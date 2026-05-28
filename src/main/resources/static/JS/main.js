@@ -1,127 +1,164 @@
-const { createApp } = Vue
+const { createApp } = Vue;
 
 createApp({
     data() {
         return {
-            activeCard: 'login', // 当前激活的卡片：'login' 或 'register'
-            isLoading: false, // 加载状态
-            loginError: '', // 登录错误信息
-            registerError: '', // 注册错误信息
-            // 登录表单数据
+            activeCard: "login",
+            isLoading: false,
+            messageType: "",
+            loginMessage: "",
+            registerMessage: "",
+            showLoginPassword: false,
+            showRegisterPassword: false,
             loginForm: {
-                username: '',
-                password: ''
+                username: "",
+                password: ""
             },
-            // 注册表单数据
             registerForm: {
-                username: '',
-                password: '',
-                email: '',
-                phone: ''
+                username: "",
+                password: "",
+                email: "",
+                phone: ""
             }
+        };
+    },
+    computed: {
+        currentMessage() {
+            return this.activeCard === "login" ? this.loginMessage : this.registerMessage;
         }
     },
     methods: {
-        // 切换卡片
         switchCard(card) {
             this.activeCard = card;
-            // 清除错误信息
-            this.loginError = '';
-            this.registerError = '';
+            this.clearMessages();
         },
-        
-        // 输入框聚焦处理
-        handleFocus(e) {
-            e.target.parentElement.classList.add('has-content');
+
+        clearMessages() {
+            this.messageType = "";
+            this.loginMessage = "";
+            this.registerMessage = "";
         },
-        
-        // 输入框失焦处理
-        handleBlur(e) {
-            if (!e.target.value) {
-                e.target.parentElement.classList.remove('has-content');
-            }
+
+        showPasswordHelp() {
+            this.messageType = "success";
+            this.loginMessage = "如忘记密码，请联系工作人员或由家属协助重置密码。";
         },
-        
-        // 登录功能
-        async login() {
-            // 表单验证
+
+        validateLoginForm() {
             if (!this.loginForm.username || !this.loginForm.password) {
-                this.loginError = '请输入用户名和密码';
+                this.messageType = "error";
+                this.loginMessage = "请输入用户名和密码后再登录。";
+                return false;
+            }
+
+            return true;
+        },
+
+        validateRegisterForm() {
+            const { username, password, email, phone } = this.registerForm;
+
+            if (!username || !password || !email || !phone) {
+                this.messageType = "error";
+                this.registerMessage = "请完整填写用户名、联系电话、邮箱和密码。";
+                return false;
+            }
+
+            if (password.length < 6) {
+                this.messageType = "error";
+                this.registerMessage = "密码长度至少为 6 位，请重新输入。";
+                return false;
+            }
+
+            if (!/^1\d{10}$/.test(phone)) {
+                this.messageType = "error";
+                this.registerMessage = "请输入正确的 11 位手机号。";
+                return false;
+            }
+
+            return true;
+        },
+
+        async login() {
+            this.clearMessages();
+
+            if (!this.validateLoginForm()) {
                 return;
             }
-            
+
             this.isLoading = true;
-            this.loginError = '';
-            
+
             try {
-                const response = await fetch('http://localhost:8080/user/login', {
-                    method: 'POST',
+                const response = await fetch("/user/login", {
+                    method: "POST",
                     headers: {
-                        'Content-Type': 'application/json'
+                        "Content-Type": "application/json"
                     },
                     body: JSON.stringify(this.loginForm)
                 });
-                
+
                 const data = await response.json();
-                
+
                 if (data.code === 1) {
-                    // 登录成功，保存用户信息到本地存储
-                    localStorage.setItem('user', JSON.stringify(data.data));
-                    // 这里可以跳转到主页或其他页面
-                    alert('登录成功！');
+                    localStorage.setItem("user", JSON.stringify(data.data));
+                    this.messageType = "success";
+                    this.loginMessage = "登录成功，正在进入用户页面。";
+                    setTimeout(() => {
+                        window.location.href = "/user.html";
+                    }, 800);
                 } else {
-                    // 登录失败
-                    this.loginError = data.message || '登录失败';
+                    this.messageType = "error";
+                    this.loginMessage = data.message || "登录失败，请检查账号和密码。";
                 }
             } catch (error) {
-                console.error('登录失败:', error);
-                this.loginError = '网络错误，请稍后重试';
+                console.error("登录失败:", error);
+                this.messageType = "error";
+                this.loginMessage = "网络异常，请稍后重试或联系工作人员协助。";
             } finally {
                 this.isLoading = false;
             }
         },
-        
-        // 注册功能
+
         async register() {
-            // 表单验证
-            if (!this.registerForm.username || !this.registerForm.password || !this.registerForm.email || !this.registerForm.phone) {
-                this.registerError = '请填写所有必填字段';
+            this.clearMessages();
+
+            if (!this.validateRegisterForm()) {
                 return;
             }
-            
+
             this.isLoading = true;
-            this.registerError = '';
-            
+
             try {
-                const response = await fetch('http://localhost:8080/user/register', {
-                    method: 'POST',
+                const response = await fetch("/user/register", {
+                    method: "POST",
                     headers: {
-                        'Content-Type': 'application/json'
+                        "Content-Type": "application/json"
                     },
                     body: JSON.stringify(this.registerForm)
                 });
-                
+
                 const data = await response.json();
-                
+
                 if (data.code === 1) {
-                    // 注册成功，切换到登录卡片
-                    this.switchCard('login');
-                    // 显示成功信息
-                    this.loginError = '注册成功，请登录';
-                    // 3秒后清除成功信息
-                    setTimeout(() => {
-                        this.loginError = '';
-                    }, 3000);
+                    this.activeCard = "login";
+                    this.messageType = "success";
+                    this.loginMessage = "注册成功，请使用刚才填写的账号和密码登录。";
+                    this.registerForm = {
+                        username: "",
+                        password: "",
+                        email: "",
+                        phone: ""
+                    };
                 } else {
-                    // 注册失败
-                    this.registerError = data.message || '注册失败';
+                    this.messageType = "error";
+                    this.registerMessage = data.message || "注册失败，请稍后再试。";
                 }
             } catch (error) {
-                console.error('注册失败:', error);
-                this.registerError = '网络错误，请稍后重试';
+                console.error("注册失败:", error);
+                this.messageType = "error";
+                this.registerMessage = "网络异常，请稍后重试或联系工作人员协助。";
             } finally {
                 this.isLoading = false;
             }
         }
     }
-}).mount('#app')
+}).mount("#app");

@@ -4,20 +4,16 @@ spring:
 
 
   ai:
-    ollama:
-      base-url: http://localhost:11434
+    model:
+      chat: openai
+    openai:
+      base-url: https://kuaipao.pro/v1
+      api-key: ${OPENAI_API_KEY}
       chat:
-        model: qwen3.5:9b
         options:
+          model: gpt-4o
           temperature: 0.1
-#          上下文最大数
-          num-ctx: 2048
-#          最大token数
-          num-predict: 512
-#          重复惩罚
-          repeat-penalty: 1.1
-      init:
-        timeout: 30s
+          maxTokens: 512
 
   data:
     mongodb:

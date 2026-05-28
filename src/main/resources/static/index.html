@@ -3,89 +3,204 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>登录/注册 - Silver Residence</title>
+    <title>登录 - Silver Residence</title>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <link rel="stylesheet" href="CSS/style.css">
 </head>
 <body>
-    <!-- 背景装饰 -->
-    <div class="bg-decor bg-decor-1"></div>
-    <div class="bg-decor bg-decor-2"></div>
-    <div class="bg-decor bg-decor-3"></div>
-    
-    <div id="app">
-        <!-- 登录卡片 -->
-        <div class="glass-card" v-if="activeCard === 'login'">
-            <h1 class="title">欢迎回来</h1>
-            <div class="error-message" v-if="loginError">{{ loginError }}</div>
-            <form class="form" @submit.prevent="login">
-                <!-- 用户名输入框 -->
-                <div class="input-container" :class="{ 'has-content': loginForm.username }">
-                    <label class="input-label">用户名</label>
-                    <input type="text" class="input" v-model="loginForm.username" @focus="handleFocus" @blur="handleBlur">
-                </div>
-                
-                <!-- 密码输入框 -->
-                <div class="input-container" :class="{ 'has-content': loginForm.password }">
-                    <label class="input-label">密码</label>
-                    <input type="password" class="input" v-model="loginForm.password" @focus="handleFocus" @blur="handleBlur">
-                </div>
-                
-                <!-- 链接 -->
-                <div class="links">
-                    <a href="#" class="link">忘记密码？</a>
-                    <a href="#" class="link" @click.prevent="switchCard('register')">注册账号</a>
-                </div>
-                
-                <!-- 登录按钮 -->
-                <button type="submit" class="login-btn" :disabled="isLoading">
-                    {{ isLoading ? '登录中...' : '登录' }}
-                </button>
-            </form>
-        </div>
-        
-        <!-- 注册卡片 -->
-        <div class="glass-card" v-else-if="activeCard === 'register'">
-            <h1 class="title">创建账号</h1>
-            <div class="error-message" v-if="registerError">{{ registerError }}</div>
-            <form class="form" @submit.prevent="register">
-                <!-- 用户名输入框 -->
-                <div class="input-container" :class="{ 'has-content': registerForm.username }">
-                    <label class="input-label">用户名</label>
-                    <input type="text" class="input" v-model="registerForm.username" @focus="handleFocus" @blur="handleBlur">
-                </div>
-                
-                <!-- 密码输入框 -->
-                <div class="input-container" :class="{ 'has-content': registerForm.password }">
-                    <label class="input-label">密码</label>
-                    <input type="password" class="input" v-model="registerForm.password" @focus="handleFocus" @blur="handleBlur">
-                </div>
-                
-                <!-- 邮箱输入框 -->
-                <div class="input-container" :class="{ 'has-content': registerForm.email }">
-                    <label class="input-label">邮箱</label>
-                    <input type="email" class="input" v-model="registerForm.email" @focus="handleFocus" @blur="handleBlur">
-                </div>
-                
-                <!-- 电话输入框 -->
-                <div class="input-container" :class="{ 'has-content': registerForm.phone }">
-                    <label class="input-label">电话</label>
-                    <input type="tel" class="input" v-model="registerForm.phone" @focus="handleFocus" @blur="handleBlur">
-                </div>
-                
-                <!-- 链接 -->
-                <div class="links">
-                    <a href="#" class="link" @click.prevent="switchCard('login')">已有账号？登录</a>
-                </div>
-                
-                <!-- 注册按钮 -->
-                <button type="submit" class="login-btn" :disabled="isLoading">
-                    {{ isLoading ? '注册中...' : '注册' }}
-                </button>
-            </form>
-        </div>
+    <div class="page-bg">
+        <div class="bg-glow bg-glow-sun"></div>
+        <div class="bg-glow bg-glow-peach"></div>
+        <div class="bg-glow bg-glow-mint"></div>
     </div>
-    
+
+    <div id="app" class="app-shell">
+        <section class="hero-panel hero-media" aria-label="首页展示图片">
+            <div class="photo-stage">
+                <div class="photo-stage-glow"></div>
+                <img
+                    class="hero-photo"
+                    src="images/indexphoto.png"
+                    alt="长者在社区花园中活动与交流"
+                >
+            </div>
+        </section>
+
+        <main class="glass-card" :class="activeCard === 'register' ? 'is-register' : ''">
+            <div class="card-top">
+                <div>
+                    <p class="card-kicker">{{ activeCard === 'login' ? '欢迎回来' : '创建账号' }}</p>
+                    <h2 class="card-title">{{ activeCard === 'login' ? '登录您的账户' : '注册新的账户' }}</h2>
+                </div>
+                <div class="segmented-control" role="tablist" aria-label="切换登录和注册">
+                    <button
+                        type="button"
+                        class="segment-btn"
+                        role="tab"
+                        :class="{ active: activeCard === 'login' }"
+                        @click="switchCard('login')"
+                        aria-controls="login-panel"
+                        :aria-selected="activeCard === 'login'"
+                    >
+                        登录
+                    </button>
+                    <button
+                        type="button"
+                        class="segment-btn"
+                        role="tab"
+                        :class="{ active: activeCard === 'register' }"
+                        @click="switchCard('register')"
+                        aria-controls="register-panel"
+                        :aria-selected="activeCard === 'register'"
+                    >
+                        注册
+                    </button>
+                </div>
+            </div>
+
+            <p class="card-description">
+                {{ activeCard === 'login'
+                    ? '请输入账号和密码，点击下方按钮即可进入系统。'
+                    : '请完整填写资料，便于后续联系和服务确认。' }}
+            </p>
+
+            <div
+                v-if="currentMessage"
+                class="notice-message"
+                :class="messageType"
+                aria-live="polite"
+            >
+                {{ currentMessage }}
+            </div>
+
+            <form
+                v-if="activeCard === 'login'"
+                id="login-panel"
+                class="form"
+                @submit.prevent="login"
+            >
+                <div class="field-group">
+                    <label class="field-label" for="login-username">用户名</label>
+                    <input
+                        id="login-username"
+                        type="text"
+                        class="input"
+                        v-model.trim="loginForm.username"
+                        placeholder="请输入用户名"
+                        autocomplete="username"
+                    >
+                </div>
+
+                <div class="field-group">
+                    <label class="field-label" for="login-password">密码</label>
+                    <div class="input-with-action">
+                        <input
+                            id="login-password"
+                            :type="showLoginPassword ? 'text' : 'password'"
+                            class="input"
+                            v-model.trim="loginForm.password"
+                            placeholder="请输入密码"
+                            autocomplete="current-password"
+                        >
+                        <button
+                            type="button"
+                            class="input-action"
+                            @click="showLoginPassword = !showLoginPassword"
+                            :aria-label="showLoginPassword ? '隐藏密码' : '显示密码'"
+                        >
+                            {{ showLoginPassword ? '隐藏' : '显示' }}
+                        </button>
+                    </div>
+                </div>
+
+                <div class="assist-row">
+                    <span>建议由本人或家属核对后再登录</span>
+                    <button type="button" class="text-button" @click="showPasswordHelp">
+                        忘记密码
+                    </button>
+                </div>
+
+                <button type="submit" class="primary-btn" :disabled="isLoading">
+                    {{ isLoading ? '正在登录，请稍候…' : '登录账户' }}
+                </button>
+            </form>
+
+            <form
+                v-else
+                id="register-panel"
+                class="form"
+                @submit.prevent="register"
+            >
+                <div class="field-grid">
+                    <div class="field-group">
+                        <label class="field-label" for="register-username">用户名</label>
+                        <input
+                            id="register-username"
+                            type="text"
+                            class="input"
+                            v-model.trim="registerForm.username"
+                            placeholder="例如：zhangsan"
+                            autocomplete="username"
+                        >
+                    </div>
+
+                    <div class="field-group">
+                        <label class="field-label" for="register-phone">联系电话</label>
+                        <input
+                            id="register-phone"
+                            type="tel"
+                            class="input"
+                            v-model.trim="registerForm.phone"
+                            placeholder="请输入手机号"
+                            autocomplete="tel"
+                            inputmode="tel"
+                        >
+                    </div>
+                </div>
+
+                <div class="field-group">
+                    <label class="field-label" for="register-email">邮箱</label>
+                    <input
+                        id="register-email"
+                        type="email"
+                        class="input"
+                        v-model.trim="registerForm.email"
+                        placeholder="请输入常用邮箱"
+                        autocomplete="email"
+                    >
+                </div>
+
+                <div class="field-group">
+                    <label class="field-label" for="register-password">设置密码</label>
+                    <div class="input-with-action">
+                        <input
+                            id="register-password"
+                            :type="showRegisterPassword ? 'text' : 'password'"
+                            class="input"
+                            v-model.trim="registerForm.password"
+                            placeholder="建议使用 6 位以上密码"
+                            autocomplete="new-password"
+                        >
+                        <button
+                            type="button"
+                            class="input-action"
+                            @click="showRegisterPassword = !showRegisterPassword"
+                            :aria-label="showRegisterPassword ? '隐藏密码' : '显示密码'"
+                        >
+                            {{ showRegisterPassword ? '隐藏' : '显示' }}
+                        </button>
+                    </div>
+                </div>
+
+                <p class="form-tip">注册成功后会自动切换到登录页，您可以立即登录。</p>
+
+                <button type="submit" class="primary-btn" :disabled="isLoading">
+                    {{ isLoading ? '正在注册，请稍候…' : '提交注册' }}
+                </button>
+            </form>
+        </main>
+    </div>
+
     <script src="JS/main.js"></script>
 </body>
 </html>

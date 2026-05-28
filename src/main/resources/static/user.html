@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>用户中心 - Silver Residence</title>
+    <link rel="stylesheet" href="https://js.geoscene.cn/4.29/geoscene/themes/light/main.css">
+    <script src="https://js.geoscene.cn/4.29/"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <link rel="stylesheet" href="CSS/user.css">
+</head>
+<body>
+    <div id="user-app" class="user-page">
+        <div id="mapContainer" class="map-canvas" aria-label="地图服务容器">
+            <div class="map-shade"></div>
+            <div class="grid-pattern"></div>
+        </div>
+
+        <header class="top-shell">
+            <div class="search-bar">
+                <label class="sr-only" for="search-input">搜索需求</label>
+                <input
+                    id="search-input"
+                    v-model.trim="searchKeyword"
+                    type="text"
+                    class="search-input"
+                    placeholder="离三甲医院近、200 万以内、电梯房"
+                    @keydown.enter.prevent="handleSearch"
+                >
+                <button type="button" class="search-btn" @click="handleSearch">搜索</button>
+            </div>
+
+            <button type="button" class="profile-chip" aria-label="个人中心" @click="goToProfile">
+                <img class="profile-avatar" src="images/img.png" alt="">
+            </button>
+        </header>
+
+        <aside class="assistant-panel" :class="{ 'is-collapsed': assistantCollapsed }">
+            <button
+                type="button"
+                class="assistant-rail"
+                :aria-label="assistantCollapsed ? '展开 AI 对话框' : '收起 AI 对话框'"
+                @click="toggleAssistant"
+            >
+                <span class="rail-icon">{{ assistantCollapsed ? "AI" : "<<" }}</span>
+                <span class="rail-text">{{ assistantCollapsed ? "助手" : "收起" }}</span>
+            </button>
+
+            <div class="assistant-card">
+                <div class="assistant-header">
+                    <div class="assistant-brand">
+                        <div class="assistant-logo">AI</div>
+                        <div>
+                            <h2>地图筛选</h2>
+                            <p>用自然语言描述想找的养老社区</p>
+                        </div>
+                    </div>
+                    <button type="button" class="assistant-toggle" @click="toggleAssistant">
+                        {{ assistantCollapsed ? "展开" : "收起" }}
+                    </button>
+                </div>
+
+                <div class="assistant-body">
+                    <div class="message-bubble assistant intro">
+                        <p>今天想看哪类社区？</p>
+                        <div class="suggestion-list">
+                            <span>三甲医院 1 公里内</span>
+                            <span>200 万以内</span>
+                            <span>朝阳区靠近地铁</span>
+                        </div>
+                    </div>
+
+                    <div class="chat-log" v-if="chatMessages.length > 0">
+                        <article
+                            v-for="message in chatMessages"
+                            :key="message.id"
+                            class="chat-item"
+                            :class="message.role"
+                        >
+                            <p>{{ message.content }}</p>
+                            <time>{{ message.time }}</time>
+                        </article>
+                    </div>
+                </div>
+
+                <div class="assistant-input">
+                    <input
+                        v-model.trim="chatInput"
+                        type="text"
+                        class="chat-input"
+                        placeholder="输入筛选需求..."
+                        @keydown.enter.prevent="sendMessage"
+                    >
+                    <button type="button" class="send-btn" @click="sendMessage">发送</button>
+                </div>
+            </div>
+        </aside>
+    </div>
+    <script src="JS/user.js?v=tianditu-vector-20260528"></script>
+</body>
+</html>
