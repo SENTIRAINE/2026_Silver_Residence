@@ -107,7 +107,7 @@ createApp({
                     }, 800);
                 } else {
                     this.messageType = "error";
-                    this.loginMessage = data.message || "登录失败，请检查账号和密码。";
+                    this.loginMessage = data.msg || data.message || "登录失败，请检查账号和密码。";
                 }
             } catch (error) {
                 console.error("登录失败:", error);
@@ -150,7 +150,7 @@ createApp({
                     };
                 } else {
                     this.messageType = "error";
-                    this.registerMessage = data.message || "注册失败，请稍后再试。";
+                    this.registerMessage = data.msg || data.message || "注册失败，请稍后再试。";
                 }
             } catch (error) {
                 console.error("注册失败:", error);

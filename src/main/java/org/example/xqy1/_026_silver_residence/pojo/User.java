@@ -28,6 +28,7 @@ public class User {
 
     private String password;
 
+    @Indexed(unique = true, sparse = true)
     private String email;
 
     private String phone;

@@ -4,16 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>用户中心 - Silver Residence</title>
+    <link rel="icon" href="data:,">
     <link rel="stylesheet" href="https://js.geoscene.cn/4.29/geoscene/themes/light/main.css">
     <script src="https://js.geoscene.cn/4.29/"></script>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
-    <link rel="stylesheet" href="CSS/user.css">
+    <link rel="stylesheet" href="CSS/user.css?v=agent-gateway-v1-20260726">
 </head>
 <body>
     <div id="user-app" class="user-page">
         <div id="mapContainer" class="map-canvas" aria-label="地图服务容器">
             <div class="map-shade"></div>
             <div class="grid-pattern"></div>
+            <div id="mapStatus" class="map-status" role="status" aria-live="polite">
+                <span class="map-status-indicator" aria-hidden="true"></span>
+                <span data-map-status-text>完整地图与要素加载中</span>
+            </div>
         </div>
 
         <header class="top-shell">
@@ -27,7 +32,9 @@
                     placeholder="离三甲医院近、200 万以内、电梯房"
                     @keydown.enter.prevent="handleSearch"
                 >
-                <button type="button" class="search-btn" @click="handleSearch">搜索</button>
+                <button type="button" class="search-btn" :disabled="assistantRunning" @click="handleSearch">
+                    {{ assistantRunning ? "处理中" : "搜索" }}
+                </button>
             </div>
 
             <button type="button" class="profile-chip" aria-label="个人中心" @click="goToProfile">
@@ -51,22 +58,30 @@
                     <div class="assistant-brand">
                         <div class="assistant-logo">AI</div>
                         <div>
-                            <h2>地图筛选</h2>
-                            <p>用自然语言描述想找的养老社区</p>
+                            <h2>适老生活顾问</h2>
+                            <p>筛选地图要素，查询项目知识</p>
                         </div>
                     </div>
-                    <button type="button" class="assistant-toggle" @click="toggleAssistant">
-                        {{ assistantCollapsed ? "展开" : "收起" }}
-                    </button>
+                    <div class="assistant-header-actions">
+                        <button
+                            v-if="hasAgentMapResults"
+                            type="button"
+                            class="assistant-clear-results"
+                            @click="clearAgentResults"
+                        >清除结果</button>
+                        <button type="button" class="assistant-toggle" @click="toggleAssistant">
+                            {{ assistantCollapsed ? "展开" : "收起" }}
+                        </button>
+                    </div>
                 </div>
 
                 <div class="assistant-body">
                     <div class="message-bubble assistant intro">
-                        <p>今天想看哪类社区？</p>
+                        <p>今天想了解什么？</p>
                         <div class="suggestion-list">
-                            <span>三甲医院 1 公里内</span>
-                            <span>200 万以内</span>
-                            <span>朝阳区靠近地铁</span>
+                            <button type="button" :disabled="assistantRunning" @click="useSuggestion('筛选中山区房价不高于 20000 的住宅')">中山区住宅</button>
+                            <button type="button" :disabled="assistantRunning" @click="useSuggestion('筛选绿视率高、步行指数高的道路')">宜步行道路</button>
+                            <button type="button" :disabled="assistantRunning" @click="useSuggestion('步行指数是如何计算的？')">指标说明</button>
                         </div>
                     </div>
 
@@ -75,9 +90,35 @@
                             v-for="message in chatMessages"
                             :key="message.id"
                             class="chat-item"
-                            :class="message.role"
+                            :class="[message.role, `is-${message.status || 'complete'}`]"
                         >
-                            <p>{{ message.content }}</p>
+                            <p v-if="message.content">{{ message.content }}</p>
+                            <div v-else-if="message.status === 'running'" class="typing-indicator" aria-label="正在生成回答">
+                                <span></span><span></span><span></span>
+                            </div>
+                            <p v-if="message.role === 'assistant' && message.statusText" class="chat-status">
+                                {{ message.statusText }}
+                            </p>
+                            <ol v-if="message.citations && message.citations.length" class="citation-list" aria-label="知识来源">
+                                <li v-for="citation in message.citations" :key="citation.citationId">
+                                    <a
+                                        v-if="citationAccessUrl(citation)"
+                                        :href="citationAccessUrl(citation)"
+                                        target="_blank"
+                                        rel="noopener"
+                                    >
+                                        <span>[{{ citation.ordinal || 1 }}] {{ citationTitle(citation) }}</span>
+                                        <small>{{ citationPages(citation) }}</small>
+                                    </a>
+                                    <div v-else>
+                                        <span>[{{ citation.ordinal || 1 }}] {{ citationTitle(citation) }}</span>
+                                        <small>{{ citationPages(citation) }}</small>
+                                    </div>
+                                </li>
+                            </ol>
+                            <p v-for="(warning, warningIndex) in message.warnings" :key="warningIndex" class="chat-warning">
+                                {{ warning }}
+                            </p>
                             <time>{{ message.time }}</time>
                         </article>
                     </div>
@@ -88,14 +129,20 @@
                         v-model.trim="chatInput"
                         type="text"
                         class="chat-input"
-                        placeholder="输入筛选需求..."
+                        :placeholder="assistantRunning ? '正在处理当前请求' : '输入筛选或知识问题...'"
+                        :disabled="assistantRunning"
                         @keydown.enter.prevent="sendMessage"
                     >
-                    <button type="button" class="send-btn" @click="sendMessage">发送</button>
+                    <button
+                        type="button"
+                        class="send-btn"
+                        :class="{ 'is-stop': assistantRunning }"
+                        @click="sendMessage"
+                    >{{ assistantRunning ? "停止" : "发送" }}</button>
                 </div>
             </div>
         </aside>
     </div>
-    <script src="JS/user.js?v=tianditu-vector-20260528"></script>
+    <script src="JS/user.js?v=map-layers-20260728"></script>
 </body>
 </html>

@@ -1,4 +1,7 @@
 spring:
+  config:
+    # Local secrets use Java properties syntax and are excluded from Git.
+    import: optional:file:.env.local[.properties]
   application:
     name: 2026_Silver_Residence
 
@@ -20,3 +23,71 @@ spring:
       host: localhost
       database: Silver
       port: 27017
+
+  mvc:
+    async:
+      # Must exceed the development Run limit so the terminal event can be relayed.
+      request-timeout: ${SPRING_MVC_ASYNC_TIMEOUT_MS:210000}
+
+map:
+  geoscene:
+    # GeoScene native HTTPS endpoint used by the server-side query proxy.
+    service-url: https://xqy0919.dev.local/server/rest/services/demo/%E5%9C%B0%E5%9B%BE/MapServer
+    portal-url: https://edutrial.geoscene.cn/geoscene
+    # Development certificate has an untrusted chain/hostname. Use a valid certificate and disable this in production.
+    trust-all-tls: true
+    connect-timeout-ms: 5000
+    # Keep headroom for larger filtered result sets in the development service.
+    read-timeout-ms: ${GEOSCENE_READ_TIMEOUT_MS:90000}
+    # Counting is optional and must not consume the full Run budget after a successful feature query.
+    count-timeout-ms: ${GEOSCENE_COUNT_TIMEOUT_MS:10000}
+
+agent:
+  runtime:
+    # Shared development contract. LangGraph must enforce the Run and event TTL values.
+    max-run-duration-ms: ${AGENT_MAX_RUN_DURATION_MS:180000}
+    event-retention-ms: ${AGENT_EVENT_RETENTION_MS:86400000}
+    heartbeat-interval-ms: ${AGENT_HEARTBEAT_INTERVAL_MS:15000}
+  langgraph:
+    enabled: ${LANGGRAPH_ENABLED:false}
+    base-url: ${LANGGRAPH_BASE_URL:http://127.0.0.1:8000}
+    service-token: ${LANGGRAPH_SERVICE_TOKEN:}
+    connect-timeout-ms: 5000
+  tools:
+    service-token: ${AGENT_TOOL_SERVICE_TOKEN:}
+    timeout-ms: ${AGENT_TOOL_TIMEOUT_MS:120000}
+
+housing:
+  search:
+    policy-version: housing-search-policy-2026-07-29.1
+    snapshot-ttl-ms: ${HOUSING_SEARCH_SNAPSHOT_TTL_MS:3600000}
+    snapshot-max-stale-ms: ${HOUSING_SEARCH_SNAPSHOT_MAX_STALE_MS:86400000}
+    snapshot-refresh-interval-ms: ${HOUSING_SEARCH_SNAPSHOT_REFRESH_INTERVAL_MS:300000}
+    snapshot-prewarm-enabled: ${HOUSING_SEARCH_SNAPSHOT_PREWARM_ENABLED:true}
+    default-road-buffer-meters: 100
+    min-road-buffer-meters: 20
+    max-road-buffer-meters: 2000
+    high-percentile: 0.75
+    very-high-percentile: 0.90
+    default-convenience-weight: 0.50
+    default-road-walkability-weight: 0.50
+    default-housing-limit: 20
+    max-housing-limit: 50
+    # Bounded above the current six-layer road volume; STRtree keeps point-road matching indexed.
+    max-road-calculation-count: ${HOUSING_SEARCH_MAX_ROAD_CALCULATION_COUNT:2000}
+    max-road-display-count: 50
+    max-buffer-overlay-count: 20
+
+management:
+  health:
+    mongo:
+      enabled: false
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: never
