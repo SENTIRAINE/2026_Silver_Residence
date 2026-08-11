@@ -1,0 +1,23 @@
+{
+    "conversationId":  "4b6966c5-e41a-49c8-addd-eb37dbec1518",
+    "messageId":  "097abe5e-e1c4-4505-bc5f-6277bbc9e5cb",
+    "query":  "那个啥，我就想找个便宜点儿的，出门溜达路好走的小区",
+    "context":  {
+                    "locale":  "zh-CN",
+                    "map":  {
+                                "visibleLayerIds":  [
+                                                        0,
+                                                        1,
+                                                        2,
+                                                        3,
+                                                        4,
+                                                        5
+                                                    ],
+                                "zoom":  13,
+                                "extent":  null
+                            },
+                    "businessObjectIds":  [
+
+                                          ]
+                }
+}

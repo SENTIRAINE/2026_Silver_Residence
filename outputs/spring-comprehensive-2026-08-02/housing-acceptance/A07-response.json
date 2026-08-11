@@ -1,0 +1,1 @@
+{"success":false,"error":{"code":"INVALID_BUFFER_DISTANCE","message":"bufferMeters must be between 20 and 2000","retryable":false},"traceId":"acceptance-a07"}

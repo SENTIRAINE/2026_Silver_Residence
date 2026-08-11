@@ -1,0 +1,41 @@
+{
+    "toolCallId":  "bf92095c-3996-45e7-ae0f-d783be39b3e6",
+    "arguments":  {
+                      "mode":  "RANK",
+                      "districts":  [
+                                        "中山区"
+                                    ],
+                      "hardFilters":  {
+                                          "priceMax":  15000
+                                      },
+                      "preferences":  {
+                                          "price":  {
+                                                        "enabled":  false,
+                                                        "level":  "PREFER_LOW",
+                                                        "weight":  0
+                                                    },
+                                          "convenience":  {
+                                                              "enabled":  true,
+                                                              "level":  "PREFER_HIGH",
+                                                              "weight":  0.8
+                                                          },
+                                          "roadWalkability":  {
+                                                                  "enabled":  true,
+                                                                  "level":  "PREFER_HIGH",
+                                                                  "weight":  0.2
+                                                              }
+                                      },
+                      "roadCriteria":  {
+
+                                       },
+                      "spatial":  {
+                                      "relation":  "WITHIN_ROAD_BUFFER"
+                                  },
+                      "display":  {
+                                      "includeRoads":  false,
+                                      "includeBuffers":  false
+                                  },
+                      "limit":  20
+                  },
+    "dryRun":  false
+}

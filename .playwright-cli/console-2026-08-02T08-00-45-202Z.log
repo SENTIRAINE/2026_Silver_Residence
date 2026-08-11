@@ -1,0 +1,6 @@
+[    4434ms] [INFO] You are running a development build of Vue.
+Make sure to use the production build (*.prod.js) when deploying for production. @ https://unpkg.com/vue@3/dist/vue.global.js:12887
+[    4487ms] [ERROR] Failed to load resource: the server responded with a status of 404 () @ http://127.0.0.1:8080/favicon.ico:0
+[  142267ms] [INFO] You are running a development build of Vue.
+Make sure to use the production build (*.prod.js) when deploying for production. @ https://unpkg.com/vue@3/dist/vue.global.js:12887
+[  149969ms] [INFO] GeoScene 底图与业务要素初始化完成 {imageryBasemapLayer: v, streetBasemapLayer: v, residenceMapLayer: v, view: v} @ http://127.0.0.1:8080/JS/user.js?v=map-layers-20260728:948

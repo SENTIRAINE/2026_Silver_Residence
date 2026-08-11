@@ -1,0 +1,20 @@
+id: c4bc70bc-594a-4846-845b-44f4ef6836bf:1
+event: run.started
+data: {"messageId":"388d5f16-3b62-402c-b8ff-43df43f25b80","payload":{"status":"RUNNING"},"runId":"c4bc70bc-594a-4846-845b-44f4ef6836bf","schemaVersion":"1.1","sequence":1,"timestamp":"2026-08-02T08:11:59.894649Z","traceId":"spring-user-U05-typos-388d5f16-3b62-402c-b8ff-43df43f25b80"}
+
+id: c4bc70bc-594a-4846-845b-44f4ef6836bf:2
+event: route.selected
+data: {"messageId":"388d5f16-3b62-402c-b8ff-43df43f25b80","payload":{"intent":"CLARIFY"},"runId":"c4bc70bc-594a-4846-845b-44f4ef6836bf","schemaVersion":"1.1","sequence":2,"timestamp":"2026-08-02T08:12:04.258946Z","traceId":"spring-user-U05-typos-388d5f16-3b62-402c-b8ff-43df43f25b80"}
+
+id: c4bc70bc-594a-4846-845b-44f4ef6836bf:3
+event: answer.delta
+data: {"messageId":"388d5f16-3b62-402c-b8ff-43df43f25b80","payload":{"content":"您这句话里有两种可能：一种是在找住宅，按房价来筛选；另一种是在找道路，按步行相关的指标来筛选。现在我还不能稳妥判断您想查的是哪一类。请您告诉我，您这次想找的是“"},"runId":"c4bc70bc-594a-4846-845b-44f4ef6836bf","schemaVersion":"1.1","sequence":3,"timestamp":"2026-08-02T08:12:04.282000Z","traceId":"spring-user-U05-typos-388d5f16-3b62-402c-b8ff-43df43f25b80"}
+
+id: c4bc70bc-594a-4846-845b-44f4ef6836bf:4
+event: answer.delta
+data: {"messageId":"388d5f16-3b62-402c-b8ff-43df43f25b80","payload":{"content":"房子”还是“道路”？"},"runId":"c4bc70bc-594a-4846-845b-44f4ef6836bf","schemaVersion":"1.1","sequence":4,"timestamp":"2026-08-02T08:12:04.298485Z","traceId":"spring-user-U05-typos-388d5f16-3b62-402c-b8ff-43df43f25b80"}
+
+id: c4bc70bc-594a-4846-845b-44f4ef6836bf:5
+event: run.completed
+data: {"messageId":"388d5f16-3b62-402c-b8ff-43df43f25b80","payload":{"answer":"您这句话里有两种可能：一种是在找住宅，按房价来筛选；另一种是在找道路，按步行相关的指标来筛选。现在我还不能稳妥判断您想查的是哪一类。请您告诉我，您这次想找的是“房子”还是“道路”？","citations":[],"status":"SUCCEEDED","warnings":[]},"runId":"c4bc70bc-594a-4846-845b-44f4ef6836bf","schemaVersion":"1.1","sequence":5,"timestamp":"2026-08-02T08:12:04.344825Z","traceId":"spring-user-U05-typos-388d5f16-3b62-402c-b8ff-43df43f25b80"}
+

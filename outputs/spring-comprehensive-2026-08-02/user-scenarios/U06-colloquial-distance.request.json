@@ -1,0 +1,23 @@
+{
+    "conversationId":  "4b6966c5-e41a-49c8-addd-eb37dbec1518",
+    "messageId":  "92beaa92-3f78-4ffe-ba36-6c5e7a85d70d",
+    "query":  "道路步行指数高点附近有啥小区，百来米就行",
+    "context":  {
+                    "locale":  "zh-CN",
+                    "map":  {
+                                "visibleLayerIds":  [
+                                                        0,
+                                                        1,
+                                                        2,
+                                                        3,
+                                                        4,
+                                                        5
+                                                    ],
+                                "zoom":  13,
+                                "extent":  null
+                            },
+                    "businessObjectIds":  [
+
+                                          ]
+                }
+}

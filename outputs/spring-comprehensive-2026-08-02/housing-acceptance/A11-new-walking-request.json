@@ -1,0 +1,41 @@
+{
+    "toolCallId":  "5d3a39f9-6b76-4e0b-8baa-449faf56e0ea",
+    "arguments":  {
+                      "mode":  "BUFFER_FILTER",
+                      "districts":  [
+
+                                    ],
+                      "hardFilters":  {
+
+                                      },
+                      "preferences":  {
+                                          "price":  {
+                                                        "enabled":  false,
+                                                        "level":  "PREFER_LOW",
+                                                        "weight":  0
+                                                    },
+                                          "convenience":  {
+                                                              "enabled":  false,
+                                                              "level":  "PREFER_HIGH",
+                                                              "weight":  0
+                                                          },
+                                          "roadWalkability":  {
+                                                                  "enabled":  true,
+                                                                  "level":  "HIGH",
+                                                                  "weight":  1
+                                                              }
+                                      },
+                      "roadCriteria":  {
+                                           "newWalkingMin":  80
+                                       },
+                      "spatial":  {
+                                      "relation":  "WITHIN_ROAD_BUFFER"
+                                  },
+                      "display":  {
+                                      "includeRoads":  true,
+                                      "includeBuffers":  true
+                                  },
+                      "limit":  20
+                  },
+    "dryRun":  false
+}

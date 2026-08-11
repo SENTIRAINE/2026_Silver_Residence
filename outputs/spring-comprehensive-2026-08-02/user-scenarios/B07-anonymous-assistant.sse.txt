@@ -1,0 +1,4 @@
+id: preflight:2a52f4dd-a19f-4e2e-a6ab-34ffc77911f3:1
+event: preflight.failed
+data: {"schemaVersion":"1.1","runId":null,"messageId":"44592ce7-c04b-4a80-819e-364d9e0f2fce","sequence":1,"traceId":"2a52f4dd-a19f-4e2e-a6ab-34ffc77911f3","timestamp":"2026-08-02T08:10:25.648585500Z","payload":{"status":"FAILED","error":{"code":"AUTHENTICATION_REQUIRED","message":"请登录后使用智能助手","retryable":false}}}
+

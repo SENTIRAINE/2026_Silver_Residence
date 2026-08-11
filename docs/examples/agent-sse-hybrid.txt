@@ -1,0 +1,35 @@
+id: 13546154-1f31-4091-b7ce-a890b39d16bf:1
+event: run.started
+data: {"schemaVersion":"1.1","runId":"13546154-1f31-4091-b7ce-a890b39d16bf","messageId":"7ec1cff4-6705-401c-b36a-692b5f9173a7","sequence":1,"traceId":"08ae51fa-b5bc-4faf-bf18-62b0fba857e2","timestamp":"2026-07-26T08:00:00Z","payload":{"status":"RUNNING"}}
+
+id: 13546154-1f31-4091-b7ce-a890b39d16bf:2
+event: route.selected
+data: {"schemaVersion":"1.1","runId":"13546154-1f31-4091-b7ce-a890b39d16bf","messageId":"7ec1cff4-6705-401c-b36a-692b5f9173a7","sequence":2,"traceId":"08ae51fa-b5bc-4faf-bf18-62b0fba857e2","timestamp":"2026-07-26T08:00:01Z","payload":{"intent":"HYBRID"}}
+
+id: 13546154-1f31-4091-b7ce-a890b39d16bf:3
+event: retrieval.completed
+data: {"schemaVersion":"1.1","runId":"13546154-1f31-4091-b7ce-a890b39d16bf","messageId":"7ec1cff4-6705-401c-b36a-692b5f9173a7","sequence":3,"traceId":"08ae51fa-b5bc-4faf-bf18-62b0fba857e2","timestamp":"2026-07-26T08:00:02Z","payload":{"documents":1}}
+
+id: 13546154-1f31-4091-b7ce-a890b39d16bf:4
+event: tool.started
+data: {"schemaVersion":"1.1","runId":"13546154-1f31-4091-b7ce-a890b39d16bf","messageId":"7ec1cff4-6705-401c-b36a-692b5f9173a7","sequence":4,"traceId":"08ae51fa-b5bc-4faf-bf18-62b0fba857e2","timestamp":"2026-07-26T08:00:03Z","payload":{"toolCallId":"139db323-0823-47a3-99b2-41ca6dc81ced","toolName":"queryMapPoints"}}
+
+id: 13546154-1f31-4091-b7ce-a890b39d16bf:5
+event: tool.completed
+data: {"schemaVersion":"1.1","runId":"13546154-1f31-4091-b7ce-a890b39d16bf","messageId":"7ec1cff4-6705-401c-b36a-692b5f9173a7","sequence":5,"traceId":"08ae51fa-b5bc-4faf-bf18-62b0fba857e2","timestamp":"2026-07-26T08:00:04Z","payload":{"toolCallId":"139db323-0823-47a3-99b2-41ca6dc81ced","toolName":"queryMapPoints","status":"SUCCEEDED","durationMs":320}}
+
+id: 13546154-1f31-4091-b7ce-a890b39d16bf:6
+event: map.result
+data: {"schemaVersion":"1.1","runId":"13546154-1f31-4091-b7ce-a890b39d16bf","messageId":"7ec1cff4-6705-401c-b36a-692b5f9173a7","sequence":6,"traceId":"08ae51fa-b5bc-4faf-bf18-62b0fba857e2","timestamp":"2026-07-26T08:00:05Z","payload":{"queryId":"query-1","toolCallIds":["139db323-0823-47a3-99b2-41ca6dc81ced"],"mode":"replace","querySummary":"找到 1 个符合条件的住宅点位","appliedFilters":[{"field":"房价","operator":"<=","value":22000,"unit":"元/㎡"}],"resultSets":[{"toolCallId":"139db323-0823-47a3-99b2-41ca6dc81ced","role":"PRIMARY_RESULTS","layerId":2,"layerName":"zhongshan_1","geometryType":"point","spatialReference":{"wkid":4326},"total":1,"returned":1,"exceededTransferLimit":false,"objectIdField":"OBJECTID","features":[{"id":"2:501","attributes":{"OBJECTID":501,"name":"华洋道进口食品","address":"南山路112号","adname":"中山区","房价":21145,"覆盖度评分":100,"新步行":40},"geometry":{"x":121.64493920812815,"y":38.913905619003,"spatialReference":{"wkid":4326}}}]}],"overlays":[],"display":{"fitBounds":true,"paddingPx":48,"maxZoom":17,"layerOrder":["PRIMARY_RESULTS"]},"warnings":[]}}
+
+id: 13546154-1f31-4091-b7ce-a890b39d16bf:7
+event: citation.added
+data: {"schemaVersion":"1.1","runId":"13546154-1f31-4091-b7ce-a890b39d16bf","messageId":"7ec1cff4-6705-401c-b36a-692b5f9173a7","sequence":7,"traceId":"08ae51fa-b5bc-4faf-bf18-62b0fba857e2","timestamp":"2026-07-26T08:00:06Z","payload":{"citationId":"cit-1","ordinal":1,"documentId":"doc-walkability","documentVersion":"v3","title":"大连生活圈评价技术说明","contentType":"application/pdf","sectionPath":["指标体系","步行指数"],"pageStart":12,"pageEnd":13,"chunkId":"chunk-12","excerpt":"步行指数综合道路连通性与设施可达性。","excerptAllowed":true,"score":0.91,"source":{"resourceRef":"rag:doc-walkability:v3:chunk-12","url":"/api/assistant/citations/cit-1"},"warnings":[]}}
+
+id: 13546154-1f31-4091-b7ce-a890b39d16bf:8
+event: answer.delta
+data: {"schemaVersion":"1.1","runId":"13546154-1f31-4091-b7ce-a890b39d16bf","messageId":"7ec1cff4-6705-401c-b36a-692b5f9173a7","sequence":8,"traceId":"08ae51fa-b5bc-4faf-bf18-62b0fba857e2","timestamp":"2026-07-26T08:00:07Z","payload":{"content":"已找到 1 个中山区住宅点位。"}}
+
+id: 13546154-1f31-4091-b7ce-a890b39d16bf:9
+event: run.completed
+data: {"schemaVersion":"1.1","runId":"13546154-1f31-4091-b7ce-a890b39d16bf","messageId":"7ec1cff4-6705-401c-b36a-692b5f9173a7","sequence":9,"traceId":"08ae51fa-b5bc-4faf-bf18-62b0fba857e2","timestamp":"2026-07-26T08:00:08Z","payload":{"status":"SUCCEEDED","answer":"已找到 1 个中山区住宅点位。步行指数用于描述步行环境综合表现。[1]","citations":[{"citationId":"cit-1","ordinal":1,"documentId":"doc-walkability","documentVersion":"v3","title":"大连生活圈评价技术说明","contentType":"application/pdf","sectionPath":["指标体系","步行指数"],"pageStart":12,"pageEnd":13,"chunkId":"chunk-12","excerpt":"步行指数综合道路连通性与设施可达性。","excerptAllowed":true,"score":0.91,"source":{"resourceRef":"rag:doc-walkability:v3:chunk-12","url":"/api/assistant/citations/cit-1"},"warnings":[]}],"warnings":[]}}

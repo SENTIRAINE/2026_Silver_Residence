@@ -1,0 +1,27 @@
+- generic [ref=e2]:
+  - region "首页展示图片" [ref=e3]:
+    - img "长者在社区花园中活动与交流" [ref=e6]
+  - main [ref=e7]:
+    - generic [ref=e8]:
+      - generic [ref=e9]:
+        - paragraph [ref=e10]: 欢迎回来
+        - heading "登录您的账户" [level=2] [ref=e11]
+      - tablist "切换登录和注册" [ref=e12]:
+        - tab "登录" [selected] [ref=e13] [cursor=pointer]
+        - tab "注册" [ref=e14] [cursor=pointer]
+    - paragraph [ref=e15]: 请输入账号和密码，点击下方按钮即可进入系统。
+    - generic [ref=e16]:
+      - generic [ref=e17]:
+        - generic [ref=e18]: 用户名
+        - textbox "用户名" [ref=e19]:
+          - /placeholder: 请输入用户名
+      - generic [ref=e20]:
+        - generic [ref=e21]: 密码
+        - generic [ref=e22]:
+          - textbox "密码" [ref=e23]:
+            - /placeholder: 请输入密码
+          - button "显示密码" [ref=e24] [cursor=pointer]: 显示
+      - generic [ref=e25]:
+        - generic [ref=e26]: 建议由本人或家属核对后再登录
+        - button "忘记密码" [ref=e27] [cursor=pointer]
+      - button "登录账户" [ref=e28] [cursor=pointer]

@@ -1,0 +1,23 @@
+{
+    "conversationId":  "4b6966c5-e41a-49c8-addd-eb37dbec1518",
+    "messageId":  "8caa79b2-f7af-46ed-b497-5f03a0adef23",
+    "query":  "高步行指数道路一万米以内的小区",
+    "context":  {
+                    "locale":  "zh-CN",
+                    "map":  {
+                                "visibleLayerIds":  [
+                                                        0,
+                                                        1,
+                                                        2,
+                                                        3,
+                                                        4,
+                                                        5
+                                                    ],
+                                "zoom":  13,
+                                "extent":  null
+                            },
+                    "businessObjectIds":  [
+
+                                          ]
+                }
+}

@@ -1,0 +1,39 @@
+{
+    "toolCallId":  "151022a0-d26d-4177-b5f9-ab3fe6d6df93",
+    "arguments":  {
+                      "mode":  "RANK",
+                      "districts":  [
+
+                                    ],
+                      "hardFilters":  {
+                                          "priceMax":  12000
+                                      },
+                      "preferences":  {
+                                          "price":  {
+                                                        "enabled":  false,
+                                                        "level":  "PREFER_LOW",
+                                                        "weight":  0
+                                                    },
+                                          "convenience":  {
+                                                              "enabled":  true,
+                                                              "level":  "PREFER_HIGH"
+                                                          },
+                                          "roadWalkability":  {
+                                                                  "enabled":  true,
+                                                                  "level":  "PREFER_HIGH"
+                                                              }
+                                      },
+                      "roadCriteria":  {
+
+                                       },
+                      "spatial":  {
+                                      "relation":  "WITHIN_ROAD_BUFFER"
+                                  },
+                      "display":  {
+                                      "includeRoads":  true,
+                                      "includeBuffers":  true
+                                  },
+                      "limit":  20
+                  },
+    "dryRun":  false
+}

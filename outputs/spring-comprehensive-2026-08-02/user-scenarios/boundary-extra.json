@@ -1,0 +1,39 @@
+{
+    "duplicateRegistration":  {
+                                  "body":  {
+                                               "code":  0,
+                                               "msg":  "ç¨æ·åå·²å­å¨ï¼è¯·æ´æ¢ï¼",
+                                               "data":  null
+                                           },
+                                  "status":  200
+                              },
+    "login":  {
+                  "body":  {
+                               "code":  1,
+                               "msg":  null,
+                               "data":  {
+                                            "id":  "6a6ef9855259d87c3c8d5009",
+                                            "username":  "codex_spring_20260802_1602",
+                                            "password":  null,
+                                            "email":  "codex_spring_20260802_1602@example.test",
+                                            "phone":  "13900000082",
+                                            "address":  null,
+                                            "createTime":  "2026-08-02T08:02:13.685+00:00",
+                                            "updateTime":  "2026-08-02T08:02:13.685+00:00"
+                                        }
+                           },
+                  "status":  200
+              },
+    "logout":  {
+                   "body":  {
+                                "code":  1,
+                                "msg":  null,
+                                "data":  null
+                            },
+                   "status":  200
+               },
+    "assistantAfterLogout":  {
+                                 "body":  "",
+                                 "status":  401
+                             }
+}

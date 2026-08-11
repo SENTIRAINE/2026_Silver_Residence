@@ -1,0 +1,24 @@
+id: 8df61ec5-08f9-4900-84ff-dd2b54198e83:1
+event: run.started
+data: {"messageId":"1b32d91f-3be7-4a7b-84be-f6831a0854a5","payload":{"status":"RUNNING"},"runId":"8df61ec5-08f9-4900-84ff-dd2b54198e83","schemaVersion":"1.1","sequence":1,"timestamp":"2026-08-02T08:13:55.072296Z","traceId":"spring-user-U12-short-request-1b32d91f-3be7-4a7b-84be-f6831a0854a5"}
+
+: heartbeat
+
+: heartbeat
+
+id: 8df61ec5-08f9-4900-84ff-dd2b54198e83:2
+event: route.selected
+data: {"messageId":"1b32d91f-3be7-4a7b-84be-f6831a0854a5","payload":{"intent":"CLARIFY"},"runId":"8df61ec5-08f9-4900-84ff-dd2b54198e83","schemaVersion":"1.1","sequence":2,"timestamp":"2026-08-02T08:14:26.443501Z","traceId":"spring-user-U12-short-request-1b32d91f-3be7-4a7b-84be-f6831a0854a5"}
+
+id: 8df61ec5-08f9-4900-84ff-dd2b54198e83:3
+event: answer.delta
+data: {"messageId":"1b32d91f-3be7-4a7b-84be-f6831a0854a5","payload":{"content":"您这句话里有两个意思：一个像是在说价格，另一个像是在说走路是否方便。现在还看不出您想找的是住宅，还是道路，所以我不能直接替您判断。请您先告诉我，您要找的是住宅，"},"runId":"8df61ec5-08f9-4900-84ff-dd2b54198e83","schemaVersion":"1.1","sequence":3,"timestamp":"2026-08-02T08:14:26.465961Z","traceId":"spring-user-U12-short-request-1b32d91f-3be7-4a7b-84be-f6831a0854a5"}
+
+id: 8df61ec5-08f9-4900-84ff-dd2b54198e83:4
+event: answer.delta
+data: {"messageId":"1b32d91f-3be7-4a7b-84be-f6831a0854a5","payload":{"content":"还是道路？"},"runId":"8df61ec5-08f9-4900-84ff-dd2b54198e83","schemaVersion":"1.1","sequence":4,"timestamp":"2026-08-02T08:14:26.482829Z","traceId":"spring-user-U12-short-request-1b32d91f-3be7-4a7b-84be-f6831a0854a5"}
+
+id: 8df61ec5-08f9-4900-84ff-dd2b54198e83:5
+event: run.completed
+data: {"messageId":"1b32d91f-3be7-4a7b-84be-f6831a0854a5","payload":{"answer":"您这句话里有两个意思：一个像是在说价格，另一个像是在说走路是否方便。现在还看不出您想找的是住宅，还是道路，所以我不能直接替您判断。请您先告诉我，您要找的是住宅，还是道路？","citations":[],"status":"SUCCEEDED","warnings":[]},"runId":"8df61ec5-08f9-4900-84ff-dd2b54198e83","schemaVersion":"1.1","sequence":5,"timestamp":"2026-08-02T08:14:26.526742Z","traceId":"spring-user-U12-short-request-1b32d91f-3be7-4a7b-84be-f6831a0854a5"}
+

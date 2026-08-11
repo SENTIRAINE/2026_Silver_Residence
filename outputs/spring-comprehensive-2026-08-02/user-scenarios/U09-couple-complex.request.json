@@ -1,0 +1,23 @@
+{
+    "conversationId":  "4b6966c5-e41a-49c8-addd-eb37dbec1518",
+    "messageId":  "6988e2cb-cd84-4887-aa6c-aeb3c65d2d32",
+    "query":  "我和老伴住，房价别过一万三，便利度高一点，附近路走着舒服，先给我挑几个，再说说为什么",
+    "context":  {
+                    "locale":  "zh-CN",
+                    "map":  {
+                                "visibleLayerIds":  [
+                                                        0,
+                                                        1,
+                                                        2,
+                                                        3,
+                                                        4,
+                                                        5
+                                                    ],
+                                "zoom":  13,
+                                "extent":  null
+                            },
+                    "businessObjectIds":  [
+
+                                          ]
+                }
+}

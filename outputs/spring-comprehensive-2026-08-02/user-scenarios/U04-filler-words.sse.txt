@@ -1,0 +1,18 @@
+id: aff908bd-a79d-49b6-a7c6-789a4699f064:1
+event: run.started
+data: {"messageId":"097abe5e-e1c4-4505-bc5f-6277bbc9e5cb","payload":{"status":"RUNNING"},"runId":"aff908bd-a79d-49b6-a7c6-789a4699f064","schemaVersion":"1.1","sequence":1,"timestamp":"2026-08-02T08:11:43.942976Z","traceId":"spring-user-U04-filler-words-097abe5e-e1c4-4505-bc5f-6277bbc9e5cb"}
+
+: heartbeat
+
+id: aff908bd-a79d-49b6-a7c6-789a4699f064:2
+event: route.selected
+data: {"messageId":"097abe5e-e1c4-4505-bc5f-6277bbc9e5cb","payload":{"intent":"CLARIFY"},"runId":"aff908bd-a79d-49b6-a7c6-789a4699f064","schemaVersion":"1.1","sequence":2,"timestamp":"2026-08-02T08:11:58.840404Z","traceId":"spring-user-U04-filler-words-097abe5e-e1c4-4505-bc5f-6277bbc9e5cb"}
+
+id: aff908bd-a79d-49b6-a7c6-789a4699f064:3
+event: answer.delta
+data: {"messageId":"097abe5e-e1c4-4505-bc5f-6277bbc9e5cb","payload":{"content":"目前还不能直接判断，因为“便宜”和“路好走”没有明确标准。您先告诉我房价最高能接受每平方米多少？"},"runId":"aff908bd-a79d-49b6-a7c6-789a4699f064","schemaVersion":"1.1","sequence":3,"timestamp":"2026-08-02T08:11:58.891257Z","traceId":"spring-user-U04-filler-words-097abe5e-e1c4-4505-bc5f-6277bbc9e5cb"}
+
+id: aff908bd-a79d-49b6-a7c6-789a4699f064:4
+event: run.completed
+data: {"messageId":"097abe5e-e1c4-4505-bc5f-6277bbc9e5cb","payload":{"answer":"目前还不能直接判断，因为“便宜”和“路好走”没有明确标准。您先告诉我房价最高能接受每平方米多少？","citations":[],"status":"SUCCEEDED","warnings":[]},"runId":"aff908bd-a79d-49b6-a7c6-789a4699f064","schemaVersion":"1.1","sequence":4,"timestamp":"2026-08-02T08:11:58.918376Z","traceId":"spring-user-U04-filler-words-097abe5e-e1c4-4505-bc5f-6277bbc9e5cb"}
+
