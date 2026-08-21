@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>个人中心 - 银龄安居</title>
+    <link rel="icon" href="data:,">
+    <link rel="stylesheet" href="CSS/profile.css?v=brand-title-20260821">
+</head>
+<body>
+    <div class="profile-shell">
+        <aside class="profile-sidebar" aria-label="个人中心导航">
+            <a class="brand-mark" href="/user.html" aria-label="返回适老住宅地图">
+                <span class="brand-seal" aria-hidden="true">银</span>
+                <span>
+                    <strong>银龄安居</strong>
+                    <small>面向适老生活选址的智能分析决策平台</small>
+                </span>
+            </a>
+
+            <nav class="profile-nav" aria-label="个人中心栏目">
+                <button class="profile-nav__item is-active" type="button" data-profile-tab="overview" aria-current="page">
+                    <span aria-hidden="true">01</span>账户概览
+                </button>
+                <button class="profile-nav__item" type="button" data-profile-tab="preferences">
+                    <span aria-hidden="true">02</span>居住偏好
+                </button>
+                <button class="profile-nav__item" type="button" data-profile-tab="favorites">
+                    <span aria-hidden="true">03</span>收藏小区
+                </button>
+                <button class="profile-nav__item" type="button" data-profile-tab="settings">
+                    <span aria-hidden="true">04</span>账户设置
+                </button>
+            </nav>
+
+            <div class="sidebar-status">
+                <span></span>
+                <p><strong>静态示例</strong><small>数据仅用于页面展示</small></p>
+            </div>
+        </aside>
+
+        <main class="profile-main">
+            <header class="profile-topbar">
+                <a class="back-link" href="/user.html"><span aria-hidden="true">←</span> 返回地图</a>
+                <div class="topbar-user">
+                    <span>示例用户</span>
+                    <img src="images/img.png" alt="示例用户头像">
+                </div>
+            </header>
+
+            <section class="profile-view is-active" data-profile-view="overview">
+                <div class="profile-intro">
+                    <div>
+                        <p class="section-kicker">ACCOUNT OVERVIEW</p>
+                        <h1>晚上好，示例用户</h1>
+                        <p>这里汇总您的居住偏好、收藏小区和近期地图查看记录。</p>
+                    </div>
+                    <button class="secondary-button" type="button" data-open-tab="preferences">编辑居住偏好</button>
+                </div>
+
+                <div class="summary-strip" aria-label="账户数据概览">
+                    <div><strong>03</strong><span>收藏小区</span></div>
+                    <div><strong>02</strong><span>关注区域</span></div>
+                    <div><strong>08</strong><span>近期查看</span></div>
+                    <div><strong>100m</strong><span>道路范围</span></div>
+                </div>
+
+                <div class="overview-grid">
+                    <section class="surface account-card" aria-labelledby="accountTitle">
+                        <div class="surface-heading">
+                            <div><p class="section-kicker">PROFILE</p><h2 id="accountTitle">基本资料</h2></div>
+                            <span class="status-chip">资料完整</span>
+                        </div>
+                        <dl class="profile-details">
+                            <div><dt>用户名</dt><dd>silver_user</dd></div>
+                            <div><dt>联系电话</dt><dd>138 **** 6808</dd></div>
+                            <div><dt>常用邮箱</dt><dd>silver@example.com</dd></div>
+                            <div><dt>所在城市</dt><dd>辽宁省大连市</dd></div>
+                        </dl>
+                    </section>
+
+                    <section class="surface preference-card" aria-labelledby="preferenceTitle">
+                        <div class="surface-heading">
+                            <div><p class="section-kicker">PREFERENCE</p><h2 id="preferenceTitle">当前偏好</h2></div>
+                        </div>
+                        <div class="preference-list">
+                            <div><span>重点区域</span><strong>中山区、西岗区</strong></div>
+                            <div><span>小区便利度</span><strong>优先较高</strong></div>
+                            <div><span>道路步行指数</span><strong>优先较高</strong></div>
+                            <div><span>显示数量</span><strong>20 个小区</strong></div>
+                        </div>
+                    </section>
+                </div>
+
+                <section class="recent-section" aria-labelledby="recentTitle">
+                    <div class="section-heading-row">
+                        <div><p class="section-kicker">RECENT ACTIVITY</p><h2 id="recentTitle">近期查看</h2></div>
+                        <button class="text-command" type="button" data-open-tab="favorites">查看收藏</button>
+                    </div>
+                    <div class="activity-table" role="table" aria-label="近期查看记录">
+                        <div class="activity-row activity-row--head" role="row"><span>小区</span><span>行政区</span><span>便利度</span><span>查看时间</span></div>
+                        <div class="activity-row" role="row"><strong>桃源里</strong><span>中山区</span><span class="score">92.4</span><time>今天 19:42</time></div>
+                        <div class="activity-row" role="row"><strong>胜利花园</strong><span>西岗区</span><span class="score">88.7</span><time>昨天 16:10</time></div>
+                        <div class="activity-row" role="row"><strong>星海人家</strong><span>沙河口区</span><span class="score">86.1</span><time>8月15日</time></div>
+                    </div>
+                </section>
+            </section>
+
+            <section class="profile-view" data-profile-view="preferences" hidden>
+                <div class="page-heading"><p class="section-kicker">LIVING PREFERENCES</p><h1>居住偏好</h1><p>用于展示未来可配置的筛选默认值。</p></div>
+                <form class="preference-form" data-static-form>
+                    <fieldset class="surface form-section">
+                        <legend>重点关注区域</legend>
+                        <div class="choice-grid">
+                            <label><input type="checkbox" checked><span>中山区</span></label>
+                            <label><input type="checkbox" checked><span>西岗区</span></label>
+                            <label><input type="checkbox"><span>沙河口区</span></label>
+                        </div>
+                    </fieldset>
+                    <fieldset class="surface form-section">
+                        <legend>居住环境倾向</legend>
+                        <div class="form-grid">
+                            <label><span>小区便利度</span><select><option>优先较高</option><option>不限</option></select></label>
+                            <label><span>道路步行指数</span><select><option>优先较高</option><option>不限</option></select></label>
+                            <label><span>周边道路范围</span><select><option>100 米</option><option>200 米</option><option>500 米</option></select></label>
+                            <label><span>默认显示数量</span><select><option>20 个小区</option><option>10 个小区</option><option>30 个小区</option></select></label>
+                        </div>
+                    </fieldset>
+                    <button class="primary-button" type="submit">保存示例设置</button>
+                </form>
+            </section>
+
+            <section class="profile-view" data-profile-view="favorites" hidden>
+                <div class="page-heading"><p class="section-kicker">SAVED COMMUNITIES</p><h1>收藏小区</h1><p>集中查看已关注的住宅及关键指标。</p></div>
+                <div class="favorite-list">
+                    <article class="favorite-item"><div><span class="district-label">中山区</span><h2>桃源里</h2><p>解放路生活圈 · 近期查看 3 次</p></div><dl><div><dt>便利度</dt><dd>92.4</dd></div><div><dt>参考房价</dt><dd>18,600 元/㎡</dd></div></dl><a href="/user.html">地图查看</a></article>
+                    <article class="favorite-item"><div><span class="district-label">西岗区</span><h2>胜利花园</h2><p>人民广场生活圈 · 近期查看 2 次</p></div><dl><div><dt>便利度</dt><dd>88.7</dd></div><div><dt>参考房价</dt><dd>17,900 元/㎡</dd></div></dl><a href="/user.html">地图查看</a></article>
+                    <article class="favorite-item"><div><span class="district-label">沙河口区</span><h2>星海人家</h2><p>星海湾生活圈 · 近期查看 1 次</p></div><dl><div><dt>便利度</dt><dd>86.1</dd></div><div><dt>参考房价</dt><dd>19,300 元/㎡</dd></div></dl><a href="/user.html">地图查看</a></article>
+                </div>
+            </section>
+
+            <section class="profile-view" data-profile-view="settings" hidden>
+                <div class="page-heading"><p class="section-kicker">ACCOUNT SETTINGS</p><h1>账户设置</h1><p>管理通知和界面辅助选项。</p></div>
+                <div class="settings-list surface">
+                    <label class="setting-row"><span><strong>收藏动态提醒</strong><small>收藏小区信息变化时显示提醒</small></span><input type="checkbox" checked role="switch"></label>
+                    <label class="setting-row"><span><strong>较大界面文字</strong><small>提高主要内容的字号与行距</small></span><input type="checkbox" role="switch" data-large-text></label>
+                    <label class="setting-row"><span><strong>减少动态效果</strong><small>降低页面切换和反馈动画</small></span><input type="checkbox" role="switch" data-reduced-motion></label>
+                </div>
+                <div class="security-note"><strong>登录安全</strong><p>本示例未连接账户接口，不会提交或更改真实资料。</p></div>
+            </section>
+        </main>
+    </div>
+
+    <div class="profile-toast" role="status" aria-live="polite" hidden>示例设置已更新</div>
+    <script src="JS/profile.js?v=20260817"></script>
+</body>
+</html>

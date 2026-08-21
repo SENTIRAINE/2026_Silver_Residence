@@ -12,8 +12,11 @@ import java.util.Set;
 
 @Service
 public class HousingSearchPolicyService {
+    public static final String DEFAULT_POLICY_VERSION = "housing-search-policy-2026-08-21.1";
     public static final String CONVENIENCE_SOURCE_FIELD = "归一化总分";
-    public static final String ROAD_WALKABILITY_SOURCE_FIELD = "WS";
+    public static final String ROAD_WALKABILITY_SOURCE_FIELD = "WS归一化";
+    public static final String VEGETATION_SOURCE_FIELD = "绿视率原始值";
+    public static final String NOISE_SOURCE_FIELD = "道路噪声原始值";
     public static final List<String> SUPPORTED_DISTRICTS = List.of("中山区", "西岗区", "沙河口区");
 
     private final String policyVersion;
@@ -31,7 +34,7 @@ public class HousingSearchPolicyService {
     private final int maxBufferOverlayCount;
 
     public HousingSearchPolicyService(
-            @Value("${housing.search.policy-version:housing-search-policy-2026-07-29.1}") String policyVersion,
+            @Value("${housing.search.policy-version:housing-search-policy-2026-08-21.1}") String policyVersion,
             @Value("${housing.search.default-road-buffer-meters:100}") int defaultRoadBufferMeters,
             @Value("${housing.search.min-road-buffer-meters:20}") int minRoadBufferMeters,
             @Value("${housing.search.max-road-buffer-meters:2000}") int maxRoadBufferMeters,
@@ -206,6 +209,11 @@ public class HousingSearchPolicyService {
         if (invalidNonNegative(value.wsMin()) || invalidNonNegative(value.gviMin())
                 || invalidNonNegative(value.noiMax())) {
             invalid("road criteria must be finite and non-negative");
+        }
+        if (value.wsMin() != null && value.wsMin() > 100
+                || value.gviMin() != null && value.gviMin() > 1
+                || value.noiMax() != null && value.noiMax() > 100) {
+            invalid("road criteria exceed the normalized source field ranges");
         }
     }
 

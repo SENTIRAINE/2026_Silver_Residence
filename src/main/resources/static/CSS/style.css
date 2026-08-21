@@ -191,12 +191,47 @@ input {
     pointer-events: none;
 }
 
+.project-heading,
 .card-top,
 .card-description,
 .notice-message,
 .form {
     position: relative;
     z-index: 1;
+}
+
+.project-heading {
+    margin-bottom: 24px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid rgba(118, 102, 86, 0.16);
+    font-weight: 700;
+    letter-spacing: 0;
+}
+
+.project-heading span,
+.project-heading small {
+    display: block;
+}
+
+.project-heading span {
+    color: #70472f;
+    font-family: Georgia, "Songti SC", "STSong", serif;
+    font-size: clamp(2rem, 3.4vw, 2.85rem);
+    line-height: 1.08;
+}
+
+.project-heading small {
+    margin-top: 9px;
+    color: #5d6f62;
+    font-size: clamp(0.92rem, 1.5vw, 1.08rem);
+    font-weight: 760;
+    line-height: 1.45;
+}
+
+.project-heading small::before {
+    content: "-";
+    margin-right: 0.42em;
+    color: var(--accent);
 }
 
 .card-top {
@@ -436,6 +471,11 @@ input {
     .glass-card {
         padding: 24px 18px;
     }
+
+    .project-heading {
+        margin-bottom: 21px;
+        padding-bottom: 18px;
+    }
 }
 
 @media (max-width: 680px) {
@@ -452,6 +492,14 @@ input {
     .hero-photo {
         min-height: 280px;
         border-radius: 22px;
+    }
+
+    .project-heading span {
+        font-size: 2rem;
+    }
+
+    .project-heading small {
+        font-size: 0.9rem;
     }
 
     .card-top,

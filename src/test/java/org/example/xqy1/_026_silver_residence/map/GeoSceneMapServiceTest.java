@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
+import java.lang.reflect.Field;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -56,9 +57,66 @@ class GeoSceneMapServiceTest {
         }
         for (int id = 3; id <= 5; id++) {
             assertTrue(filterNames(layers.get(id)).containsAll(
-                    List.of("name", "GVI", "NOI", "WS", "Shape_Length")
+                    List.of("name", "GVI", "NOI", "WS归一化", "绿视率原始值", "道路噪声原始值", "Shape_Length")
             ));
         }
+    }
+
+    @Test
+    void auxiliaryProxiesUseDedicatedServicesWithoutChangingMainMapProxy() throws Exception {
+        server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
+        server.createContext("/poi/0/query", exchange -> {
+            assertTrue("f=pjson".equals(exchange.getRequestURI().getRawQuery()));
+            byte[] body = "{\"service\":\"poi\"}".getBytes(StandardCharsets.UTF_8);
+            exchange.getResponseHeaders().set("Content-Type", "application/json;charset=UTF-8");
+            exchange.sendResponseHeaders(200, body.length);
+            exchange.getResponseBody().write(body);
+            exchange.close();
+        });
+        server.createContext("/map/0/query", exchange -> {
+            byte[] body = "{\"service\":\"map\"}".getBytes(StandardCharsets.UTF_8);
+            exchange.getResponseHeaders().set("Content-Type", "application/json;charset=UTF-8");
+            exchange.sendResponseHeaders(200, body.length);
+            exchange.getResponseBody().write(body);
+            exchange.close();
+        });
+        server.createContext("/slope/3", exchange -> {
+            assertTrue("f=pjson".equals(exchange.getRequestURI().getRawQuery()));
+            byte[] body = "{\"service\":\"slope\"}".getBytes(StandardCharsets.UTF_8);
+            exchange.getResponseHeaders().set("Content-Type", "application/json;charset=UTF-8");
+            exchange.sendResponseHeaders(200, body.length);
+            exchange.getResponseBody().write(body);
+            exchange.close();
+        });
+        server.start();
+
+        String base = "http://127.0.0.1:" + server.getAddress().getPort();
+        GeoSceneMapService service = new GeoSceneMapService(
+                new ObjectMapper().findAndRegisterModules(),
+                base + "/map",
+                "https://example.invalid/geoscene",
+                false,
+                1000,
+                1000,
+                1000
+        );
+        Field poiServiceUrl = GeoSceneMapService.class.getDeclaredField("poiServiceUrl");
+        poiServiceUrl.setAccessible(true);
+        poiServiceUrl.set(service, base + "/poi");
+        Field slopeServiceUrl = GeoSceneMapService.class.getDeclaredField("slopeServiceUrl");
+        slopeServiceUrl.setAccessible(true);
+        slopeServiceUrl.set(service, base + "/slope");
+
+        GeoSceneProxyResponse poiResponse = service.proxyPoiGet("/0/query", "f=pjson");
+        GeoSceneProxyResponse slopeResponse = service.proxySlopeGet("/3", "f=pjson");
+        GeoSceneProxyResponse mapResponse = service.proxyGet("/0/query", "f=pjson");
+
+        assertEquals(200, poiResponse.statusCode());
+        assertEquals("{\"service\":\"poi\"}", new String(poiResponse.body(), StandardCharsets.UTF_8));
+        assertEquals(200, slopeResponse.statusCode());
+        assertEquals("{\"service\":\"slope\"}", new String(slopeResponse.body(), StandardCharsets.UTF_8));
+        assertEquals(200, mapResponse.statusCode());
+        assertEquals("{\"service\":\"map\"}", new String(mapResponse.body(), StandardCharsets.UTF_8));
     }
 
     @Test
@@ -179,6 +237,54 @@ class GeoSceneMapServiceTest {
         assertEquals("GEOSCENE_QUERY_TIMEOUT", timeout.getCode());
         assertEquals("count", timeout.getDetails().get("phase"));
         assertEquals(0, timeout.getDetails().get("layerId"));
+    }
+
+    @Test
+    void lineRegionalStatsReturnsControlledDistrictAveragesAndCounts() throws Exception {
+        server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
+        server.createContext("/MapServer/4/query", exchange -> {
+            String query = exchange.getRequestURI().getRawQuery();
+            byte[] body = query != null && query.contains("outStatistics=")
+                    ? """
+                        {"features":[{"attributes":{
+                          "sampleCount":445,
+                          "GVIAverage":0.42,"GVIAvailableCount":440,
+                          "NOIAverage":0.31,"NOIAvailableCount":438
+                        }}]}
+                        """.getBytes(StandardCharsets.UTF_8)
+                    : "{\"features\":[{\"attributes\":{\"WS归一化\":\"67\"}}]}".getBytes(StandardCharsets.UTF_8);
+            exchange.getResponseHeaders().set("Content-Type", "application/json;charset=UTF-8");
+            exchange.sendResponseHeaders(200, body.length);
+            exchange.getResponseBody().write(body);
+            exchange.close();
+        });
+        server.start();
+
+        LineRegionalStats result = service(5000, 1000).queryLineRegionalStats(4);
+
+        assertEquals("西岗区", result.district());
+        assertEquals(445, result.sampleCount());
+        assertEquals(List.of("GVI", "NOI", "WS归一化"), result.metrics().stream().map(LineRegionalMetric::field).toList());
+        assertEquals(0.42, result.metrics().get(0).average());
+        assertEquals(440, result.metrics().get(0).availableCount());
+        assertEquals(67.0, result.metrics().get(2).average());
+    }
+
+    @Test
+    void lineRegionalStatsRejectsPointLayers() {
+        GeoSceneMapService service = new GeoSceneMapService(
+                new ObjectMapper().findAndRegisterModules(),
+                "https://example.invalid/MapServer",
+                "https://example.invalid/geoscene",
+                false,
+                1000,
+                1000,
+                1000
+        );
+
+        MapContractException error = assertThrows(MapContractException.class, () -> service.queryLineRegionalStats(2));
+        assertEquals(HttpStatus.BAD_REQUEST, error.getStatus());
+        assertEquals("INVALID_LAYER_TYPE", error.getCode());
     }
 
     private GeoSceneMapService service(int readTimeoutMs, int countTimeoutMs) {

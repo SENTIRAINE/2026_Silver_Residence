@@ -1,1 +1,0 @@
-{"success":false,"error":{"code":"INVALID_HOUSING_SEARCH_ARGUMENT","message":"Housing search arguments do not match the catalog schema","retryable":false},"traceId":"acceptance-a11-new-walking"}

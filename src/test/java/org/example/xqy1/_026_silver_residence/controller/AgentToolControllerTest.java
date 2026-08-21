@@ -139,7 +139,7 @@ class AgentToolControllerTest {
         var expected = objectMapper.readTree(Path.of(
                 "docs",
                 "examples",
-                "agent-tool-catalog-2026-07-29.1.json"
+                "agent-tool-catalog-2026-08-21.1.json"
         ).toFile());
 
         assertEquals(expected, objectMapper.valueToTree(response.data()));
@@ -260,12 +260,18 @@ class AgentToolControllerTest {
                 )),
                 List.of(new HousingSearchFeature(
                         "3:1", 3, "中山区",
-                        Map.of("WS", 70, "GVI", 0.5, "NOI", 0.2),
+                Map.of(
+                        "WS归一化", "70",
+                        "GVI", 3,
+                        "NOI", 1.25,
+                        "绿视率原始值", 0.5,
+                        "道路噪声原始值", 40.0
+                ),
                         roadGeometry
                 ))
         );
         HousingSearchPolicyService policy = new HousingSearchPolicyService(
-                "housing-search-policy-2026-07-29.1",
+                HousingSearchPolicyService.DEFAULT_POLICY_VERSION,
                 100, 20, 2000, 0.75, 0.90, 0.5, 0.5,
                 20, 50, 200, 50, 20
         );
@@ -378,7 +384,7 @@ class AgentToolControllerTest {
                 "operator", ">=",
                 "value", gvi
         )));
-        arguments.put("outFields", List.of("OBJECTID_12", "name", "GVI", "NOI", "WS"));
+        arguments.put("outFields", List.of("OBJECTID_12", "name", "GVI", "NOI", "WS归一化"));
         arguments.put("returnGeometry", true);
         arguments.put("resultRecordCount", 50);
         arguments.put("resultOffset", 0);

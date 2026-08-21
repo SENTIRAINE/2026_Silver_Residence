@@ -43,6 +43,10 @@ public class GeoSceneMapService {
 
     private final ObjectMapper objectMapper;
     private final String serviceUrl;
+    @Value("${map.geoscene.poi-service-url:https://xqy0919.dev.local/server/rest/services/demo/POI/MapServer}")
+    private String poiServiceUrl;
+    @Value("${map.geoscene.slope-service-url:https://xqy0919.dev.local/server/rest/services/demo/%E5%9D%A1%E5%BA%A6%E6%95%B0%E6%8D%AE/MapServer}")
+    private String slopeServiceUrl;
     private final String portalUrl;
     private final boolean trustAllTls;
     private final SSLSocketFactory trustAllSslSocketFactory;
@@ -114,13 +118,27 @@ public class GeoSceneMapService {
     }
 
     public GeoSceneProxyResponse proxyGet(String rawPath, String rawQuery) {
+        return proxyGetFromService(serviceUrl, rawPath, rawQuery);
+    }
+
+    public GeoSceneProxyResponse proxyPoiGet(String rawPath, String rawQuery) {
+        String baseUrl = poiServiceUrl == null || poiServiceUrl.isBlank() ? serviceUrl : poiServiceUrl;
+        return proxyGetFromService(stripTrailingSlash(baseUrl), rawPath, rawQuery);
+    }
+
+    public GeoSceneProxyResponse proxySlopeGet(String rawPath, String rawQuery) {
+        String baseUrl = slopeServiceUrl == null || slopeServiceUrl.isBlank() ? serviceUrl : slopeServiceUrl;
+        return proxyGetFromService(stripTrailingSlash(baseUrl), rawPath, rawQuery);
+    }
+
+    private GeoSceneProxyResponse proxyGetFromService(String baseUrl, String rawPath, String rawQuery) {
         if (rawPath == null || rawPath.isBlank()) {
             rawPath = "/";
         }
         if (!rawPath.matches("/[A-Za-z0-9_./%\\-]*") || rawPath.contains("..")) {
             throw new MapContractException(HttpStatus.BAD_REQUEST, "INVALID_PROXY_PATH", "GeoScene proxy path is not allowed");
         }
-        String endpoint = serviceUrl + (rawPath.startsWith("/") ? rawPath : "/" + rawPath);
+        String endpoint = baseUrl + (rawPath.startsWith("/") ? rawPath : "/" + rawPath);
         if (rawQuery != null && !rawQuery.isBlank()) {
             endpoint += "?" + rawQuery;
         }
@@ -180,6 +198,89 @@ public class GeoSceneMapService {
                 : returnCount ? countFeatures(layerId, where, request) : features.size();
         return new MapFeatureQueryResult(layerId, layer.name(), layer.geometryType(), total,
                 response.path("exceededTransferLimit").asBoolean(false), features);
+    }
+
+    public LineRegionalStats queryLineRegionalStats(int layerId) {
+        MapLayerDefinition layer = layerDefinitions.get(layerId);
+        if (layer == null || !"polyline".equals(layer.geometryType())) {
+            throw new MapContractException(HttpStatus.BAD_REQUEST, "INVALID_LAYER_TYPE", "layerId must identify a line layer");
+        }
+        List<String> metricFields = List.of("GVI", "NOI", "WS归一化");
+        List<Map<String, String>> statistics = new ArrayList<>();
+        String objectIdField = layer.fields().contains("OBJECTID") ? "OBJECTID" : "OBJECTID_12";
+        statistics.add(Map.of("statisticType", "count", "onStatisticField", objectIdField, "outStatisticFieldName", "sampleCount"));
+        for (String field : List.of("GVI", "NOI")) {
+            String alias = "WS归一化".equals(field) ? "WSNormalized" : field;
+            statistics.add(Map.of("statisticType", "avg", "onStatisticField", field, "outStatisticFieldName", alias + "Average"));
+            statistics.add(Map.of("statisticType", "count", "onStatisticField", field, "outStatisticFieldName", alias + "AvailableCount"));
+        }
+        Map<String, String> params = new LinkedHashMap<>();
+        params.put("f", "json");
+        params.put("where", "1=1");
+        params.put("returnGeometry", "false");
+        params.put("outStatistics", objectMapper.valueToTree(statistics).toString());
+        JsonNode response = getJson(serviceUrl + "/" + layerId + "/query", params, readTimeoutMs,
+                Map.of("layerId", layerId, "phase", "line-regional-statistics"));
+        if (response.has("error")) {
+            JsonNode error = response.path("error");
+            throw new MapContractException(HttpStatus.BAD_GATEWAY, "GEOSCENE_QUERY_FAILED",
+                    error.path("message").asText("GeoScene statistics query failed"), true, Map.of("layerId", layerId));
+        }
+        JsonNode attributes = response.path("features").path(0).path("attributes");
+        long sampleCount = attributes.path("sampleCount").asLong(0);
+        List<LineRegionalMetric> metrics = new ArrayList<>();
+        Map<String, String> labels = Map.of("GVI", "绿视率", "NOI", "道路噪声", "WS归一化", "步行指数");
+        for (String field : metricFields) {
+            String alias = "WS归一化".equals(field) ? "WSNormalized" : field;
+            JsonNode value = attributes.get(alias + "Average");
+            Double average = value == null || value.isNull() ? null : value.asDouble();
+            long availableCount = attributes.path(alias + "AvailableCount").asLong(0);
+            metrics.add(new LineRegionalMetric(field, labels.get(field), average, availableCount));
+        }
+        metrics.set(2, readNormalizedWsMetric(layerId));
+        return new LineRegionalStats(layerId, layer.name(), districtForLineLayer(layerId), sampleCount, metrics);
+    }
+
+    private LineRegionalMetric readNormalizedWsMetric(int layerId) {
+        Map<String, String> params = new LinkedHashMap<>();
+        params.put("f", "json");
+        params.put("where", "1=1");
+        params.put("outFields", "WS归一化");
+        params.put("returnGeometry", "false");
+        params.put("resultRecordCount", "2000");
+        params.put("resultOffset", "0");
+        JsonNode response = getJson(serviceUrl + "/" + layerId + "/query", params, readTimeoutMs,
+                Map.of("layerId", layerId, "phase", "line-ws-normalized-statistics"));
+        if (response.has("error")) {
+            JsonNode error = response.path("error");
+            throw new MapContractException(HttpStatus.BAD_GATEWAY, "GEOSCENE_QUERY_FAILED",
+                    error.path("message").asText("GeoScene WS normalized query failed"), true, Map.of("layerId", layerId));
+        }
+        double sum = 0.0;
+        long count = 0;
+        for (JsonNode feature : response.path("features")) {
+            JsonNode value = feature.path("attributes").get("WS归一化");
+            if (value == null || value.isNull()) continue;
+            try {
+                double number = Double.parseDouble(value.asText());
+                if (Double.isFinite(number)) {
+                    sum += number;
+                    count++;
+                }
+            } catch (NumberFormatException ignored) {
+                // Ignore malformed normalized scores.
+            }
+        }
+        return new LineRegionalMetric("WS归一化", "步行指数", count == 0 ? null : sum / count, count);
+    }
+
+    private String districtForLineLayer(int layerId) {
+        return switch (layerId) {
+            case 3 -> "中山区";
+            case 4 -> "西岗区";
+            case 5 -> "沙河口区";
+            default -> "";
+        };
     }
 
     private MapLayerDefinition requireLayer(MapFeatureQueryRequest request, boolean linesOnly, boolean pointsOnly) {
@@ -434,8 +535,8 @@ public class GeoSceneMapService {
         List<String> pointFields = List.of("OBJECTID", "Shape", "id", "name", "address", "wgs84_x", "wgs84_y", "pname", "cityname", "adname", "大类", "中类", "小类", "餐饮密度", "风景密度", "科教密度", "购物密度", "金融密度", "公共密度", "覆盖度", "覆盖度评分", "新步行", "总原始分", "归一化总分", "房价");
         List<String> shahekouPointFields = new ArrayList<>(pointFields);
         shahekouPointFields.add("交通密度");
-        List<String> zhongshanLineFields = List.of("OBJECTID_12", "OBJECTID", "Shape", "fclass", "name", "typecode", "wgs84_x", "wgs84_y", "GVI", "NOI", "WS", "Shape_Length");
-        List<String> districtLineFields = List.of("OBJECTID_12", "Shape", "fclass", "name", "typecode", "wgs84_x", "wgs84_y", "GVI", "NOI", "WS", "Shape_Length");
+        List<String> zhongshanLineFields = List.of("OBJECTID_12", "OBJECTID", "Shape", "fclass", "name", "typecode", "wgs84_x", "wgs84_y", "GVI", "NOI", "WS归一化", "绿视率原始值", "道路噪声原始值", "Shape_Length");
+        List<String> districtLineFields = List.of("OBJECTID_12", "Shape", "fclass", "name", "typecode", "wgs84_x", "wgs84_y", "GVI", "NOI", "WS归一化", "绿视率原始值", "道路噪声原始值", "Shape_Length");
         definitions.put(0, new MapLayerDefinition(0, "shahekou_1", "point", "name", List.copyOf(shahekouPointFields), pointFilters()));
         definitions.put(1, new MapLayerDefinition(1, "xigang_1", "point", "name", pointFields, pointFilters()));
         definitions.put(2, new MapLayerDefinition(2, "zhongshan_1", "point", "name", pointFields, pointFilters()));
@@ -457,9 +558,11 @@ public class GeoSceneMapService {
 
     private static List<MapFieldDefinition> lineFilters() {
         return List.of(
-                field("GVI", "绿视率", "number", "=", ">=", "<=", ">", "<"),
-                field("NOI", "道路噪声", "number", "=", ">=", "<=", ">", "<"),
-                field("WS", "步行指数", "number", "=", ">=", "<=", ">", "<"),
+                field("GVI", "绿视率等级：0=高，1=较高，3=中等，5=低", "number", "=", ">=", "<=", ">", "<"),
+                field("NOI", "道路噪声等级：0=低，1.25=较低，2.5=中，3.75=较高，5=高", "number", "=", ">=", "<=", ">", "<"),
+                field("WS归一化", "步行指数（0-100）", "number", "=", ">=", "<=", ">", "<"),
+                field("绿视率原始值", "绿视率原始分（vegetation）", "number", "=", ">=", "<=", ">", "<"),
+                field("道路噪声原始值", "道路噪声原始分（noise）", "number", "=", ">=", "<=", ">", "<"),
                 field("Shape_Length", "道路长度", "number", "=", ">=", "<=", ">", "<"),
                 field("name", "道路名称", "string", "=", "like")
         );

@@ -45,7 +45,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @RequestMapping("/internal/agent-tools")
 public class AgentToolController {
     private static final Logger LOGGER = LoggerFactory.getLogger(AgentToolController.class);
-    private static final String CATALOG_VERSION = "2026-07-29.1";
+    private static final String CATALOG_VERSION = "2026-08-21.1";
     private static final Set<String> ALLOWED_ARGUMENTS = Set.of(
             "layerId", "filters", "outFields", "returnGeometry",
             "resultRecordCount", "resultOffset", "returnCount"
@@ -58,6 +58,7 @@ public class AgentToolController {
     private final ObjectMapper housingArgumentsMapper;
     private final String serviceToken;
     private final int toolTimeoutMs;
+    private final String housingPolicyVersion;
     private final Map<String, StoredExecution> executions = new ConcurrentHashMap<>();
 
     @Autowired
@@ -67,7 +68,8 @@ public class AgentToolController {
             GeoSceneHousingSearchDataProvider housingDataProvider,
             ObjectMapper objectMapper,
             @Value("${agent.tools.service-token:}") String serviceToken,
-            @Value("${agent.tools.timeout-ms:120000}") int toolTimeoutMs
+            @Value("${agent.tools.timeout-ms:120000}") int toolTimeoutMs,
+            @Value("${housing.search.policy-version:housing-search-policy-2026-08-21.1}") String housingPolicyVersion
     ) {
         this.mapService = mapService;
         this.housingSearchService = housingSearchService;
@@ -77,6 +79,21 @@ public class AgentToolController {
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true);
         this.serviceToken = serviceToken == null ? "" : serviceToken.trim();
         this.toolTimeoutMs = Math.max(1000, toolTimeoutMs);
+        this.housingPolicyVersion = housingPolicyVersion;
+    }
+
+    public AgentToolController(
+            GeoSceneMapService mapService,
+            HousingSearchService housingSearchService,
+            GeoSceneHousingSearchDataProvider housingDataProvider,
+            ObjectMapper objectMapper,
+            String serviceToken,
+            int toolTimeoutMs
+    ) {
+        this(
+                mapService, housingSearchService, housingDataProvider, objectMapper,
+                serviceToken, toolTimeoutMs, HousingSearchPolicyService.DEFAULT_POLICY_VERSION
+        );
     }
 
     public AgentToolController(
@@ -116,7 +133,7 @@ public class AgentToolController {
                 ),
                 tool(
                         "queryMapLines",
-                        "查询 3 至 5 号道路图层。GVI 是绿视率，NOI 是道路噪声，WS 是道路步行指数。",
+                        "查询 3 至 5 号道路图层。GVI/NOI 是等级字段，vegetation/noise 是原始分，WS归一化是 0-100 的道路步行指数。",
                         List.of(3, 4, 5)
                 ),
                 housingSearchTool()
@@ -160,7 +177,7 @@ public class AgentToolController {
                             "valid", true,
                             "toolName", toolName,
                             "mode", resolved.mode(),
-                            "policyVersion", "housing-search-policy-2026-07-29.1",
+                            "policyVersion", housingPolicyVersion,
                             "catalogVersion", CATALOG_VERSION
                     );
                 } else {
@@ -423,7 +440,7 @@ public class AgentToolController {
     private Map<String, Object> housingSearchTool() {
         Map<String, Object> tool = new LinkedHashMap<>();
         tool.put("name", "searchHousingCandidates");
-        tool.put("description", "按住宅硬约束、便利度软偏好和道路 WS 空间证据执行确定性推荐或道路缓冲区筛选。便利度固定使用归一化总分，WS 仅来自道路图层。");
+        tool.put("description", "按住宅硬约束、便利度软偏好和道路 WS归一化空间证据执行确定性推荐或道路缓冲区筛选。便利度固定使用归一化总分，WS归一化仅来自道路图层。");
         tool.put("sideEffect", false);
         tool.put("requiresConfirmation", false);
         tool.put("timeoutMs", toolTimeoutMs);
@@ -474,9 +491,18 @@ public class AgentToolController {
         ));
         properties.put("roadCriteria", objectSchema(
                 Map.of(
-                        "wsMin", Map.of("type", "number", "minimum", 0),
-                        "gviMin", Map.of("type", "number", "minimum", 0),
-                        "noiMax", Map.of("type", "number", "minimum", 0)
+                        "wsMin", Map.of(
+                                "type", "number", "minimum", 0, "maximum", 100,
+                                "description", "道路 WS归一化 最小值（0-100）"
+                        ),
+                        "gviMin", Map.of(
+                                "type", "number", "minimum", 0, "maximum", 1,
+                                "description", "道路绿视率原始分 vegetation 最小值（0-1），不使用 GVI 等级值"
+                        ),
+                        "noiMax", Map.of(
+                                "type", "number", "minimum", 0, "maximum", 100,
+                                "description", "道路噪声原始分 noise 最大值（0-100），不使用 NOI 等级值"
+                        )
                 ),
                 List.of()
         ));
@@ -508,7 +534,7 @@ public class AgentToolController {
 
     private Map<String, Object> housingSearchOutputSchema() {
         Map<String, Object> properties = new LinkedHashMap<>();
-        properties.put("policyVersion", Map.of("type", "string", "const", "housing-search-policy-2026-07-29.1"));
+        properties.put("policyVersion", Map.of("type", "string", "const", housingPolicyVersion));
         properties.put("dataVersion", Map.of("type", "string", "minLength", 1));
         properties.put("mode", Map.of("type", "string", "enum", List.of("RANK", "BUFFER_FILTER")));
         properties.put("statisticsScope", objectSchema(

@@ -92,8 +92,8 @@ public class HousingSearchService {
             roadThreshold = roadWsDistribution.percentileValue(thresholdPercentile);
             double threshold = roadThreshold;
             calculationRoads = calculationRoads.stream()
-                    .filter(road -> finiteNumber(road.attributes().get("WS")) != null
-                            && finiteNumber(road.attributes().get("WS")) >= threshold)
+                    .filter(road -> finiteNumber(road.attributes().get(HousingSearchPolicyService.ROAD_WALKABILITY_SOURCE_FIELD)) != null
+                            && finiteNumber(road.attributes().get(HousingSearchPolicyService.ROAD_WALKABILITY_SOURCE_FIELD)) >= threshold)
                     .toList();
         }
         calculationRoads = calculationRoads.stream()
@@ -301,9 +301,9 @@ public class HousingSearchService {
 
     private Predicate<HousingSearchFeature> roadCriteria(HousingSearchRequest.RoadCriteria criteria) {
         return road -> {
-            Double ws = finiteNumber(road.attributes().get("WS"));
-            Double gvi = finiteNumber(road.attributes().get("GVI"));
-            Double noi = finiteNumber(road.attributes().get("NOI"));
+            Double ws = finiteNumber(road.attributes().get(HousingSearchPolicyService.ROAD_WALKABILITY_SOURCE_FIELD));
+            Double gvi = finiteNumber(road.attributes().get(HousingSearchPolicyService.VEGETATION_SOURCE_FIELD));
+            Double noi = finiteNumber(road.attributes().get(HousingSearchPolicyService.NOISE_SOURCE_FIELD));
             return (criteria.wsMin() == null || ws != null && ws >= criteria.wsMin())
                     && (criteria.gviMin() == null || gvi != null && gvi >= criteria.gviMin())
                     && (criteria.noiMax() == null || noi != null && noi <= criteria.noiMax());
@@ -319,7 +319,7 @@ public class HousingSearchService {
             List<RoadSpatialSearchService.RoadMatch> valid = matches.byHousingId()
                     .getOrDefault(feature.id(), List.of())
                     .stream()
-                    .filter(match -> finiteNumber(match.road().attributes().get("WS")) != null)
+                    .filter(match -> finiteNumber(match.road().attributes().get(HousingSearchPolicyService.ROAD_WALKABILITY_SOURCE_FIELD)) != null)
                     .toList();
             if (valid.isEmpty()) {
                 continue;
@@ -328,7 +328,7 @@ public class HousingSearchService {
             double totalWeight = 0;
             for (RoadSpatialSearchService.RoadMatch match : valid) {
                 double weight = 1.0 / (match.distanceMeters() + 10.0);
-                weightedSum += finiteNumber(match.road().attributes().get("WS")) * weight;
+                weightedSum += finiteNumber(match.road().attributes().get(HousingSearchPolicyService.ROAD_WALKABILITY_SOURCE_FIELD)) * weight;
                 totalWeight += weight;
             }
             result.put(feature.id(), new NearbyRoadMetric(
@@ -488,7 +488,7 @@ public class HousingSearchService {
 
     private Comparator<HousingSearchFeature> roadOrder() {
         return Comparator
-                .comparing((HousingSearchFeature road) -> finiteNumber(road.attributes().get("WS")),
+                .comparing((HousingSearchFeature road) -> finiteNumber(road.attributes().get(HousingSearchPolicyService.ROAD_WALKABILITY_SOURCE_FIELD)),
                         Comparator.nullsLast(Comparator.reverseOrder()))
                 .thenComparing(HousingSearchFeature::id);
     }
@@ -613,10 +613,18 @@ public class HousingSearchService {
     }
 
     private static Double finiteNumber(Object value) {
-        if (!(value instanceof Number number)) {
+        final double result;
+        if (value instanceof Number number) {
+            result = number.doubleValue();
+        } else if (value instanceof String text) {
+            try {
+                result = Double.parseDouble(text.trim());
+            } catch (NumberFormatException ignored) {
+                return null;
+            }
+        } else {
             return null;
         }
-        double result = number.doubleValue();
         return Double.isFinite(result) ? result : null;
     }
 

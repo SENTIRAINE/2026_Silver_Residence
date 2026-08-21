@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>登录 - Silver Residence</title>
+    <title>银龄安居 - 面向适老生活选址的智能分析决策平台</title>
     <link rel="icon" href="data:,">
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
-    <link rel="stylesheet" href="CSS/style.css">
+    <link rel="stylesheet" href="CSS/style.css?v=brand-title-20260821">
 </head>
 <body>
     <div class="page-bg">
@@ -28,6 +28,10 @@
         </section>
 
         <main class="glass-card" :class="activeCard === 'register' ? 'is-register' : ''">
+            <h1 class="project-heading">
+                <span>银龄安居</span>
+                <small>面向适老生活选址的智能分析决策平台</small>
+            </h1>
             <div class="card-top">
                 <div>
                     <p class="card-kicker">{{ activeCard === 'login' ? '欢迎回来' : '创建账号' }}</p>

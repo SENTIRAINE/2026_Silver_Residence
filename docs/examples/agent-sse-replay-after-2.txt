@@ -1,9 +1,0 @@
-# GET /api/v1/runs/66666666-6666-4666-8666-666666666666/events?afterSequence=2
-
-id: 66666666-6666-4666-8666-666666666666:3
-event: answer.delta
-data: {"schemaVersion":"1.1","runId":"66666666-6666-4666-8666-666666666666","messageId":"66666666-6666-4666-8666-766666666666","sequence":3,"traceId":"trace-replay","timestamp":"2026-07-26T09:50:02Z","payload":{"content":"这是断线后重放的第三个事件。"}}
-
-id: 66666666-6666-4666-8666-666666666666:4
-event: run.completed
-data: {"schemaVersion":"1.1","runId":"66666666-6666-4666-8666-666666666666","messageId":"66666666-6666-4666-8666-766666666666","sequence":4,"traceId":"trace-replay","timestamp":"2026-07-26T09:50:03Z","payload":{"status":"SUCCEEDED","answer":"这是断线后重放的第三个事件。","citations":[],"warnings":[]}}

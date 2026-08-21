@@ -156,7 +156,7 @@ class GeoSceneHousingSearchDataProviderTest {
             geometry.put("x", 121.60 + layerId * 0.001);
             geometry.put("y", 38.90);
         } else {
-            attributes.put("WS", 60 + layerId);
+            attributes.put("WS归一化", String.valueOf(60 + layerId));
             ArrayNode path = feature.putObject("geometry").putArray("paths").addArray();
             path.addArray().add(121.59).add(38.90);
             path.addArray().add(121.61).add(38.90);

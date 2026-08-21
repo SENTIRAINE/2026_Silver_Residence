@@ -1,4 +1,0 @@
-id: preflight:spring-user-U13-long-query-f2de0745-d908-46cd-a085-543fe2c68575:1
-event: preflight.failed
-data: {"schemaVersion":"1.1","runId":null,"messageId":"f2de0745-d908-46cd-a085-543fe2c68575","sequence":1,"traceId":"spring-user-U13-long-query-f2de0745-d908-46cd-a085-543fe2c68575","timestamp":"2026-08-02T08:14:26.647347800Z","payload":{"status":"FAILED","error":{"code":"INVALID_AGENT_QUERY","message":"query 长度必须为 1 至 4000 个字符","retryable":false}}}
-

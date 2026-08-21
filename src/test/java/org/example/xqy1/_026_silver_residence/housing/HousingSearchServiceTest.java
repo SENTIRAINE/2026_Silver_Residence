@@ -331,6 +331,44 @@ class HousingSearchServiceTest {
     }
 
     @Test
+    void roadCriteriaUseRawVegetationAndNoiseInsteadOfDisplayGrades() {
+        HousingSearchSnapshot snapshot = snapshot(
+                List.of(housing("2:1", "中山区", 121.60, 38.90, 12_000, 80, 10)),
+                List.of(
+                        roadWithMetrics("3:1", "中山区", 80, 38.9000, 5, 5, 0.80, 40),
+                        roadWithMetrics("3:2", "中山区", 80, 38.9001, 0, 0, 0.20, 80)
+                )
+        );
+        HousingSearchRequest request = new HousingSearchRequest(
+                HousingSearchRequest.Mode.BUFFER_FILTER,
+                List.of("中山区"),
+                new HousingSearchRequest.HardFilters(null, null),
+                new HousingSearchRequest.Preferences(
+                        new HousingSearchRequest.PricePreference(
+                                false, HousingSearchRequest.PricePreferenceLevel.PREFER_LOW, 0.0
+                        ),
+                        new HousingSearchRequest.Preference(
+                                false, HousingSearchRequest.PreferenceLevel.PREFER_HIGH, 0.0
+                        ),
+                        new HousingSearchRequest.Preference(
+                                true, HousingSearchRequest.PreferenceLevel.PREFER_HIGH, 1.0
+                        )
+                ),
+                new HousingSearchRequest.RoadCriteria(70.0, 0.5, 60.0),
+                new HousingSearchRequest.Spatial(
+                        HousingSearchRequest.SpatialRelation.WITHIN_ROAD_BUFFER, 100
+                ),
+                new HousingSearchRequest.Display(true, false),
+                20
+        );
+
+        HousingSearchResult result = service(snapshot).search(request);
+
+        assertEquals(List.of("3:1"), result.roadFeatures().stream()
+                .map(HousingSearchResult.RoadFeature::roadId).toList());
+    }
+
+    @Test
     void restrictsStatisticsAndCandidatesToRequestedDistrictAndPreservesCustomWeights() {
         HousingSearchSnapshot snapshot = snapshot(
                 List.of(
@@ -409,7 +447,7 @@ class HousingSearchServiceTest {
 
     private HousingSearchPolicyService policy() {
         return new HousingSearchPolicyService(
-                "housing-search-policy-2026-07-29.1",
+                HousingSearchPolicyService.DEFAULT_POLICY_VERSION,
                 100, 20, 2000, 0.75, 0.90, 0.5, 0.5,
                 20, 50, 200, 50, 20
         );
@@ -472,6 +510,19 @@ class HousingSearchServiceTest {
     }
 
     private HousingSearchFeature road(String id, String district, double ws, double latitude) {
+        return roadWithMetrics(id, district, ws, latitude, 3, 1.25, 0.5, 40);
+    }
+
+    private HousingSearchFeature roadWithMetrics(
+            String id,
+            String district,
+            double ws,
+            double latitude,
+            double gviGrade,
+            double noiGrade,
+            double vegetation,
+            double noise
+    ) {
         ObjectNode geometry = objectMapper.createObjectNode();
         var path = geometry.putArray("paths").addArray();
         path.addArray().add(121.59).add(latitude);
@@ -481,7 +532,13 @@ class HousingSearchServiceTest {
                 id,
                 Integer.parseInt(id.substring(0, 1)),
                 district,
-                Map.of("WS", ws, "GVI", 0.5, "NOI", 0.2),
+                Map.of(
+                        "WS归一化", String.valueOf(ws),
+                        "GVI", gviGrade,
+                        "NOI", noiGrade,
+                        "绿视率原始值", vegetation,
+                        "道路噪声原始值", noise
+                ),
                 geometry
         );
     }

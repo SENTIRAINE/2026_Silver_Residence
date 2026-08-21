@@ -33,6 +33,10 @@ map:
   geoscene:
     # GeoScene native HTTPS endpoint used by the server-side query proxy.
     service-url: https://xqy0919.dev.local/server/rest/services/demo/%E5%9C%B0%E5%9B%BE/MapServer
+    # POI is published as a separate one-layer MapServer and must not alter the 0-5 map contract.
+    poi-service-url: https://xqy0919.dev.local/server/rest/services/demo/POI/MapServer
+    # Slope analysis is a separate MapServer: road layers 0-2 and slope DEM raster layer 3.
+    slope-service-url: https://xqy0919.dev.local/server/rest/services/demo/%E5%9D%A1%E5%BA%A6%E6%95%B0%E6%8D%AE/MapServer
     portal-url: https://edutrial.geoscene.cn/geoscene
     # Development certificate has an untrusted chain/hostname. Use a valid certificate and disable this in production.
     trust-all-tls: true
@@ -59,7 +63,7 @@ agent:
 
 housing:
   search:
-    policy-version: housing-search-policy-2026-07-29.1
+    policy-version: housing-search-policy-2026-08-21.1
     snapshot-ttl-ms: ${HOUSING_SEARCH_SNAPSHOT_TTL_MS:3600000}
     snapshot-max-stale-ms: ${HOUSING_SEARCH_SNAPSHOT_MAX_STALE_MS:86400000}
     snapshot-refresh-interval-ms: ${HOUSING_SEARCH_SNAPSHOT_REFRESH_INTERVAL_MS:300000}

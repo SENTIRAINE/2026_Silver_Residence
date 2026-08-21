@@ -3,63 +3,343 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>用户中心 - Silver Residence</title>
+    <title>地图分析 - 银龄安居</title>
     <link rel="icon" href="data:,">
     <link rel="stylesheet" href="https://js.geoscene.cn/4.29/geoscene/themes/light/main.css">
     <script src="https://js.geoscene.cn/4.29/"></script>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
-    <link rel="stylesheet" href="CSS/user.css?v=agent-gateway-v1-20260726">
+    <link rel="stylesheet" href="CSS/user.css?v=rental-photos-20260821">
 </head>
 <body>
     <div id="user-app" class="user-page">
         <div id="mapContainer" class="map-canvas" aria-label="地图服务容器">
             <div class="map-shade"></div>
             <div class="grid-pattern"></div>
-            <div id="mapStatus" class="map-status" role="status" aria-live="polite">
-                <span class="map-status-indicator" aria-hidden="true"></span>
-                <span data-map-status-text>完整地图与要素加载中</span>
-            </div>
         </div>
 
         <header class="top-shell">
-            <div class="search-bar">
-                <label class="sr-only" for="search-input">搜索需求</label>
-                <input
-                    id="search-input"
-                    v-model.trim="searchKeyword"
-                    type="text"
-                    class="search-input"
-                    placeholder="离三甲医院近、200 万以内、电梯房"
-                    @keydown.enter.prevent="handleSearch"
-                >
-                <button type="button" class="search-btn" :disabled="assistantRunning" @click="handleSearch">
-                    {{ assistantRunning ? "处理中" : "搜索" }}
-                </button>
-            </div>
-
+            <div id="mapCompassSlot" class="map-compass-slot" aria-label="地图指南针"></div>
             <button type="button" class="profile-chip" aria-label="个人中心" @click="goToProfile">
                 <img class="profile-avatar" src="images/img.png" alt="">
             </button>
         </header>
 
+        <section
+            id="regionalRoadRadar"
+            class="regional-road-radar map-tools-card"
+            :class="{
+                'is-explorer-collapsed': explorerCollapsed,
+                'is-poi-open': poiPanelExpanded,
+                'is-slope-active': slopeModeActive
+            }"
+            aria-label="地图环境图层控制"
+        >
+            <div class="map-tools-card__bar">
+                <div class="map-tools-card__identity">
+                    <span class="map-tools-card__signal" aria-hidden="true"></span>
+                    <div>
+                        <p>MAP LAYERS</p>
+                        <h2>环境图层</h2>
+                    </div>
+                </div>
+                <div class="map-tools-card__actions">
+                    <button
+                        type="button"
+                        class="slope-mode-toggle"
+                        :class="{ 'is-active': slopeModeActive }"
+                        :aria-pressed="slopeModeActive"
+                        :disabled="slopeModeStatus === 'loading' || slopeModeStatus === 'initializing'"
+                        @click="toggleSlopeMode"
+                    >
+                        <span class="slope-mode-toggle__track" aria-hidden="true"><i></i></span>
+                        <span>{{ slopeModeStatus === "loading" ? "图层加载中" : slopeModeStatus === "initializing" ? "图层准备中" : "坡度分析" }}</span>
+                    </button>
+                    <button
+                        type="button"
+                        class="poi-panel-toggle"
+                        :aria-expanded="poiPanelExpanded"
+                        aria-controls="topPoiControls"
+                        @click="togglePoiPanel"
+                    >
+                        <span>POI</span>
+                        <strong>{{ poiPanelExpanded ? "收起" : "筛选" }}</strong>
+                    </button>
+                </div>
+            </div>
+
+            <div v-if="slopeModeActive" class="slope-analysis-legends" aria-label="坡度分析图例">
+                <div class="slope-dem-legend">
+                    <span class="slope-analysis-legends__title">坡度 DEM</span>
+                    <div class="slope-dem-legend__scale" aria-label="坡度由低到高">
+                        <span>低</span>
+                        <i aria-hidden="true"></i>
+                        <span>高</span>
+                    </div>
+                </div>
+                <div class="slope-road-legend">
+                    <span class="slope-analysis-legends__title">步行指数</span>
+                    <div class="slope-road-legend__items">
+                        <span v-for="item in slopeLegendItems" :key="item.key" class="slope-road-legend__item">
+                            <i :style="{ '--legend-color': item.color }" aria-hidden="true"></i>
+                            <b>{{ item.label }}</b>
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <div id="topPoiControls" v-show="poiPanelExpanded" class="top-poi-controls">
+                <div class="top-poi-controls__heading">
+                    <div>
+                        <p>POINTS OF INTEREST</p>
+                        <h3>周边设施</h3>
+                    </div>
+                    <span>{{ poiSelectionStatus }}</span>
+                </div>
+                <div class="top-poi-controls__fields">
+                    <fieldset class="poi-multi-select">
+                        <legend>行政区</legend>
+                        <details>
+                            <summary>{{ poiDistrictSelectionLabel }}</summary>
+                            <div class="poi-multi-select__menu" role="group" aria-label="选择行政区，可多选">
+                                <label class="poi-multi-select__option is-all">
+                                    <input type="checkbox" :checked="allPoiDistrictsSelected" @change="toggleAllPoiDistricts">
+                                    <span>全部区域</span>
+                                </label>
+                                <label v-for="district in poiDistricts" :key="district" class="poi-multi-select__option">
+                                    <input type="checkbox" :value="district" v-model="selectedPoiDistricts">
+                                    <span>{{ district }}</span>
+                                </label>
+                            </div>
+                        </details>
+                    </fieldset>
+                    <fieldset class="poi-multi-select">
+                        <legend>设施类别</legend>
+                        <details>
+                            <summary>{{ poiCategorySelectionLabel }}</summary>
+                            <div class="poi-multi-select__menu" role="group" aria-label="选择设施类别，可多选">
+                                <label class="poi-multi-select__option is-all">
+                                    <input type="checkbox" :checked="allPoiCategoriesSelected" @change="toggleAllPoiCategories">
+                                    <span>全部类别</span>
+                                </label>
+                                <label v-for="category in poiCategories" :key="category.code" class="poi-multi-select__option">
+                                    <input type="checkbox" :value="category.code" v-model="selectedPoiCategories">
+                                    <i :style="{ '--poi-option-color': category.color }" aria-hidden="true"></i>
+                                    <span>{{ category.label }}</span>
+                                </label>
+                            </div>
+                        </details>
+                    </fieldset>
+                </div>
+                <div class="top-poi-controls__actions">
+                    <button type="button" class="poi-clear-button" :disabled="!hasAppliedPoiFilters" @click="clearPoiDisplay">清除</button>
+                    <button type="button" class="poi-display-button" :disabled="!canApplyPoiFilters" @click="applyPoiFilters">显示</button>
+                </div>
+            </div>
+
+            <p v-if="slopeModeError" class="map-tools-card__error" role="alert">{{ slopeModeError }}</p>
+        </section>
+
+        <aside class="explorer-panel" :class="{ 'is-collapsed': explorerCollapsed, 'is-obscured-by-map-tools': poiPanelExpanded }">
+            <div class="explorer-header">
+                <div>
+                    <h1 class="explorer-project-title">
+                        <span>银龄安居</span>
+                    </h1>
+                </div>
+                <button
+                    type="button"
+                    class="explorer-collapse"
+                    :aria-expanded="!explorerCollapsed"
+                    @click="toggleExplorer"
+                >{{ explorerCollapsed ? "展开" : "收起" }}</button>
+            </div>
+
+            <div class="explorer-content">
+                <div class="explorer-tabs" role="tablist" aria-label="筛选和结果信息">
+                    <button
+                        type="button"
+                        role="tab"
+                        :aria-selected="explorerTab === 'filters'"
+                        :class="{ active: explorerTab === 'filters' }"
+                        @click="explorerTab = 'filters'"
+                    >筛选</button>
+                    <button
+                        type="button"
+                        role="tab"
+                        :aria-selected="explorerTab === 'info'"
+                        :class="{ active: explorerTab === 'info' }"
+                        @click="explorerTab = 'info'"
+                    >结果信息 <span v-if="housingResults.length">{{ housingResults.length }}</span></button>
+                </div>
+
+                <form
+                    v-if="explorerTab === 'filters'"
+                    class="filter-form"
+                    @submit.prevent="submitFilters"
+                >
+                    <section class="housing-name-search" aria-labelledby="housingNameSearchLabel">
+                        <label id="housingNameSearchLabel" for="housingNameSearchInput">小区名称</label>
+                        <div class="housing-name-search__controls">
+                            <input
+                                id="housingNameSearchInput"
+                                v-model="housingNameQuery"
+                                type="search"
+                                maxlength="40"
+                                autocomplete="off"
+                                placeholder="输入小区名称"
+                                :disabled="filterBusy"
+                                @keydown.enter.prevent="searchHousingByName"
+                            >
+                            <button type="button" :disabled="filterBusy" @click="searchHousingByName">
+                                {{ housingNameSearchRunning ? "搜索中" : "搜索" }}
+                            </button>
+                        </div>
+                        <p v-if="housingNameSearchError" class="housing-name-search__error" role="alert">{{ housingNameSearchError }}</p>
+                    </section>
+
+                    <fieldset class="filter-group">
+                        <legend>行政区</legend>
+                        <div class="district-options">
+                            <label v-for="district in districtOptions" :key="district.value">
+                                <input type="checkbox" :value="district.value" v-model="filterForm.districts">
+                                <span>{{ district.label }}</span>
+                            </label>
+                        </div>
+                    </fieldset>
+
+                    <fieldset class="filter-group">
+                        <legend>房价范围 <small>元/平方米</small></legend>
+                        <div class="price-range">
+                            <label>
+                                <span>最低</span>
+                                <input v-model.number="filterForm.priceMin" type="number" min="0" step="500" placeholder="不限">
+                            </label>
+                            <span class="range-separator">至</span>
+                            <label>
+                                <span>最高</span>
+                                <input v-model.number="filterForm.priceMax" type="number" min="0" step="500" placeholder="不限">
+                            </label>
+                        </div>
+                    </fieldset>
+
+                    <label class="filter-field">
+                        <span>小区便利度</span>
+                        <select v-model="filterForm.convenience">
+                            <option value="NONE">不限</option>
+                            <option value="PREFER_HIGH">优先较高</option>
+                            <option value="HIGH">高，前 25%</option>
+                            <option value="VERY_HIGH">很高，前 10%</option>
+                        </select>
+                    </label>
+
+                    <label class="filter-field">
+                        <span>道路步行指数</span>
+                        <select v-model="filterForm.roadWalkability">
+                            <option value="NONE">不限</option>
+                            <option value="PREFER_HIGH">优先较高</option>
+                            <option value="HIGH">高，前 25%</option>
+                            <option value="VERY_HIGH">很高，前 10%</option>
+                        </select>
+                    </label>
+
+                    <label class="filter-field filter-slider">
+                        <span>周边道路范围 <strong>{{ filterForm.bufferMeters }} 米</strong></span>
+                        <input v-model.number="filterForm.bufferMeters" type="range" min="20" max="500" step="20">
+                        <small>用于计算住宅周边道路条件</small>
+                    </label>
+
+                    <label class="filter-field">
+                        <span>显示数量</span>
+                        <select v-model.number="filterForm.limit">
+                            <option :value="10">10 个小区</option>
+                            <option :value="20">20 个小区</option>
+                            <option :value="30">30 个小区</option>
+                        </select>
+                    </label>
+
+                    <p v-if="filterError" class="filter-error" role="alert">{{ filterError }}</p>
+
+                    <div class="filter-actions">
+                        <button type="button" class="filter-reset" :disabled="filterBusy" @click="resetFilters">重置</button>
+                        <button type="submit" class="filter-submit" :disabled="filterBusy">
+                            {{ filterRunning ? "正在筛选" : "应用筛选" }}
+                        </button>
+                    </div>
+                </form>
+
+                <section v-else class="result-panel" aria-live="polite">
+                    <div v-if="filterBusy" class="result-loading">
+                        <span></span><span></span><span></span>
+                        <p>{{ housingNameSearchRunning ? "正在搜索小区" : "正在查询住宅与道路数据" }}</p>
+                    </div>
+
+                    <template v-else-if="hasResultResponse">
+                        <div class="result-summary">
+                            <p>{{ lastQuerySummary || "筛选结果已更新" }}</p>
+                            <div class="result-metrics">
+                                <div><strong>{{ resultStats.housing }}</strong><span>{{ resultStats.housingLabel }}</span></div>
+                                <div><strong>{{ resultStats.roads }}</strong><span>相关道路</span></div>
+                                <div><strong>{{ resultStats.buffers }}</strong><span>缓冲区域</span></div>
+                            </div>
+                        </div>
+
+                        <div v-if="lastFilterLabels.length" class="applied-filter-list">
+                            <span v-for="label in lastFilterLabels" :key="label">{{ label }}</span>
+                        </div>
+
+                        <div v-if="housingResults.length" class="housing-list">
+                            <article v-for="housing in housingResults" :key="housing.id" class="housing-item">
+                                <div class="housing-item-head">
+                                    <div>
+                                        <h2>{{ housingName(housing) }}</h2>
+                                        <p>{{ housingLocation(housing) }}</p>
+                                    </div>
+                                    <button type="button" title="在地图中定位" @click="focusHousing(housing.id)">定位</button>
+                                </div>
+                                <div class="housing-data">
+                                    <div><span>房价</span><strong>{{ formatHousingPrice(housing) }}</strong></div>
+                                    <div><span>便利度</span><strong>{{ formatHousingScore(housing, 'convenience') }}</strong></div>
+                                    <div><span>覆盖评分</span><strong>{{ formatHousingScore(housing, 'coverage') }}</strong></div>
+                                </div>
+                            </article>
+                        </div>
+                        <div v-else class="result-empty">
+                            <h2>没有找到可展示的住宅点位</h2>
+                            <p>可以返回筛选页调整价格、便利度或道路条件。</p>
+                            <button type="button" @click="explorerTab = 'filters'">调整筛选</button>
+                        </div>
+
+                        <div v-if="resultWarnings.length" class="result-warnings">
+                            <p v-for="warning in resultWarnings" :key="warning">{{ resultWarningLabel(warning) }}</p>
+                        </div>
+                    </template>
+
+                    <div v-else class="result-empty is-initial">
+                        <h2>还没有筛选结果</h2>
+                        <p>在筛选页设置条件，符合的小区会显示在这里并同步标注到地图。</p>
+                        <button type="button" @click="explorerTab = 'filters'">开始筛选</button>
+                    </div>
+                </section>
+            </div>
+        </aside>
+
         <aside class="assistant-panel" :class="{ 'is-collapsed': assistantCollapsed }">
             <button
                 type="button"
                 class="assistant-rail"
-                :aria-label="assistantCollapsed ? '展开 AI 对话框' : '收起 AI 对话框'"
+                :aria-label="assistantCollapsed ? '展开贴心小助手' : '收起贴心小助手'"
                 @click="toggleAssistant"
             >
-                <span class="rail-icon">{{ assistantCollapsed ? "AI" : "<<" }}</span>
-                <span class="rail-text">{{ assistantCollapsed ? "助手" : "收起" }}</span>
+                <span class="rail-icon">{{ assistantCollapsed ? "帮" : "<<" }}</span>
+                <span class="rail-text">{{ assistantCollapsed ? "小助手" : "收起" }}</span>
             </button>
 
             <div class="assistant-card">
                 <div class="assistant-header">
                     <div class="assistant-brand">
-                        <div class="assistant-logo">AI</div>
                         <div>
-                            <h2>适老生活顾问</h2>
-                            <p>筛选地图要素，查询项目知识</p>
+                            <h2>贴心居住小助手</h2>
+                            <p>陪您筛选小区，看看周边生活条件</p>
                         </div>
                     </div>
                     <div class="assistant-header-actions">
@@ -79,9 +359,9 @@
                     <div class="message-bubble assistant intro">
                         <p>今天想了解什么？</p>
                         <div class="suggestion-list">
-                            <button type="button" :disabled="assistantRunning" @click="useSuggestion('筛选中山区房价不高于 20000 的住宅')">中山区住宅</button>
-                            <button type="button" :disabled="assistantRunning" @click="useSuggestion('筛选绿视率高、步行指数高的道路')">宜步行道路</button>
-                            <button type="button" :disabled="assistantRunning" @click="useSuggestion('步行指数是如何计算的？')">指标说明</button>
+                            <button type="button" :disabled="assistantRunning || speechListening" @click="useSuggestion('筛选中山区房价不高于 20000 的住宅')">中山区住宅</button>
+                            <button type="button" :disabled="assistantRunning || speechListening" @click="useSuggestion('筛选绿视率高、步行指数高的道路')">宜步行道路</button>
+                            <button type="button" :disabled="assistantRunning || speechListening" @click="useSuggestion('步行指数是如何计算的？')">指标说明</button>
                         </div>
                     </div>
 
@@ -96,7 +376,7 @@
                             <div v-else-if="message.status === 'running'" class="typing-indicator" aria-label="正在生成回答">
                                 <span></span><span></span><span></span>
                             </div>
-                            <p v-if="message.role === 'assistant' && message.statusText" class="chat-status">
+                            <p v-if="message.role === 'assistant' && message.status === 'running' && message.statusText" class="chat-status">
                                 {{ message.statusText }}
                             </p>
                             <ol v-if="message.citations && message.citations.length" class="citation-list" aria-label="知识来源">
@@ -116,33 +396,54 @@
                                     </div>
                                 </li>
                             </ol>
-                            <p v-for="(warning, warningIndex) in message.warnings" :key="warningIndex" class="chat-warning">
-                                {{ warning }}
-                            </p>
                             <time>{{ message.time }}</time>
                         </article>
                     </div>
                 </div>
 
-                <div class="assistant-input">
+                <div class="assistant-input has-voice">
+                    <p v-if="speechStatusMessage" class="speech-status" role="status" aria-live="polite">
+                        {{ speechStatusMessage }}
+                    </p>
                     <input
+                        ref="chatInput"
                         v-model.trim="chatInput"
                         type="text"
                         class="chat-input"
-                        :placeholder="assistantRunning ? '正在处理当前请求' : '输入筛选或知识问题...'"
-                        :disabled="assistantRunning"
+                        :placeholder="assistantRunning ? '正在处理当前请求' : speechListening ? '正在听，请直接说话...' : '输入筛选或知识问题...'"
+                        :disabled="assistantRunning || speechListening"
                         @keydown.enter.prevent="sendMessage"
                     >
                     <button
                         type="button"
+                        class="voice-btn"
+                        :class="{ 'is-listening': speechListening, 'is-unavailable': !speechRecognitionSupported }"
+                        :disabled="assistantRunning || !speechRecognitionSupported"
+                        :aria-label="speechButtonLabel"
+                        :aria-pressed="speechListening"
+                        :title="speechButtonLabel"
+                        @click="toggleSpeechRecognition"
+                    >
+                        <svg v-if="speechListening" aria-hidden="true" viewBox="0 0 24 24">
+                            <rect x="7" y="7" width="10" height="10"></rect>
+                        </svg>
+                        <svg v-else aria-hidden="true" viewBox="0 0 24 24">
+                            <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path>
+                            <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                            <path d="M12 19v3"></path>
+                        </svg>
+                    </button>
+                    <button
+                        type="button"
                         class="send-btn"
                         :class="{ 'is-stop': assistantRunning }"
+                        :disabled="speechListening"
                         @click="sendMessage"
                     >{{ assistantRunning ? "停止" : "发送" }}</button>
                 </div>
             </div>
         </aside>
     </div>
-    <script src="JS/user.js?v=map-layers-20260728"></script>
+    <script src="JS/user.js?v=rental-photos-20260821"></script>
 </body>
 </html>

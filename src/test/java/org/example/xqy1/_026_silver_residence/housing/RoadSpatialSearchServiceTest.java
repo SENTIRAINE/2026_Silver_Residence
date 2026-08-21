@@ -69,6 +69,6 @@ class RoadSpatialSearchServiceTest {
         var path = geometry.putArray("paths").addArray();
         path.addArray().add(start[0]).add(start[1]);
         path.addArray().add(end[0]).add(end[1]);
-        return new HousingSearchFeature("3:1", 3, "中山区", Map.of("WS", 80), geometry);
+        return new HousingSearchFeature("3:1", 3, "中山区", Map.of("WS归一化", "80"), geometry);
     }
 }
