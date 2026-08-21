@@ -141,12 +141,3 @@ scripts/                               本地验收与静态检查脚本
 photo/                                 房源图片原始资源
 docs/version-report-2026-08-21.md     唯一最新版本报告
 ```
-
-`docs/` 只保留版本报告。运行时契约以 Spring 的 `/internal/agent-tools/catalog` 和源码 DTO 为准；历史 OpenAPI、Catalog、SSE 样例和验收中间文件不再作为仓库文档入口。
-
-## 发布注意事项
-
-1. 发布前确认 Spring、Tool health、LangGraph `/readyz` 均为可用状态。
-2. 重新执行 GeoScene 六层数据探针、A01-A11 Tool 场景和浏览器桌面/移动端验收。
-3. LangGraph 必须先从 Spring 拉取 Catalog `2026-08-21.1`，并同步 Housing policy `housing-search-policy-2026-08-21.1` 与 Schema 指纹；不能继续使用旧 Catalog。
-4. 不得把真实 Token、数据库文件、Cookie、运行日志或验收截图提交到源码仓库。
